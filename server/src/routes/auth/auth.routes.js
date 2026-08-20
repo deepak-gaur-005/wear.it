@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { requireAuth } from "../../middleware/auth.middleware.js";
-import { asyncHandler } from "../../utils/asyncHandler.js";
+import { requireAuth } from "../../middlewares/auth.middleware.js";
+import { asyncHandler } from "../../utils/AsyncHandler.js";
 import { clerkClient, getAuth } from "@clerk/express";
 import { ApiError } from "../../utils/ApiError.js";
 import { User } from "../../models/user.model.js";
@@ -53,7 +53,7 @@ authRouter.post(
         // if the current user is existing user or not 
         // update/do nothing
         // create the user and save in our db with
-        
+
         const existingUser = await User.findOne({
             clerkUserId: userId,
         });
@@ -63,7 +63,7 @@ authRouter.post(
             : false;
 
         const nextRole =
-            existingUser?.role === "admin"
+            existingUser?.role === "admin" 
                 ? "admin"
                 : shouldBeAdmin
                     ? "admin"
@@ -144,3 +144,4 @@ authRouter.get(
         });
     })
 );
+
