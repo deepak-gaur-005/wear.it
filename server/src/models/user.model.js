@@ -3,27 +3,27 @@ import mongoose from "mongoose";
 const addressSchema = new mongoose.Schema(
     {
         fullname: {
-            type: string,
+            type: String,
             required: true,
             trim: true,
         },
         address: {
-            type: string,
+            type: String,
             required: true,
             trim: true,
         },
         state: {
-            type: string,
+            type: String,
             required: true,
             trim: true,
         },
         postalCode: {
-            type: string,
+            type: String,
             required: true,
             trim: true,
         },
         isDefault: {
-            type: boolean,
+            type: Boolean,
             default: false,
         },
     },
@@ -32,7 +32,7 @@ const addressSchema = new mongoose.Schema(
     }
 )
 
-const userSchema = new mongoose>Schema(
+const userSchema = new mongoose.Schema(
     {
         clerkUserId: {
             type: String,
@@ -49,7 +49,7 @@ const userSchema = new mongoose>Schema(
             required: false,
         },
         role: {
-            type: string,
+            type: String,
             enum: ["user", "admin"],
             default: "user",
         },
