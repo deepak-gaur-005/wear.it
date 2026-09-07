@@ -1,5 +1,5 @@
 import { Outlet } from "react-router-dom";
-import { CustomerNavbar } from "../customer/desktop-navbar";
+import { CustomerNavbar } from "../customer/common/desktop-navbar";
 
 export function CustomerLayout() {
     return (
