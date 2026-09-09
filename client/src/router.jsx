@@ -8,6 +8,13 @@ import { CustomerProfile } from "./pages/customer/Profile";
 import { SignInPage } from "./pages/auth/Sign-in";
 import { SignUpPage } from "./pages/auth/Sign-up";
 import { StoreHome } from "./pages/customer/Home";
+import { RoleGaurdLayout } from "./components/auth/RoleGuardLayout";
+import AdminDashboard from "./pages/admin/Dashboard";
+import AdminProducts from "./pages/admin/Products";
+import AdminCoupons from "./pages/admin/Coupons";
+import AdminOrders from "./pages/admin/Order";
+import AdminSettings from "./pages/admin/Settings";
+import { AdminLayout } from "./components/layout/AdminLayout";
 
 export const router = createBrowserRouter([
     {
@@ -42,5 +49,41 @@ export const router = createBrowserRouter([
             }
 
         ]
+    },
+    {
+        element : <ProtectedLayout/>,
+        children : [
+            {
+            element : <RoleGaurdLayout allow={["admin"]} />,
+            children : [{
+                path : "/admin",
+                element : <AdminLayout/>,
+
+                children : [
+                    {
+                        index : true,
+                        element : <AdminDashboard/>
+                    },
+                    {
+                        path : 'products',
+                        element : <AdminProducts />
+                    },
+                    {
+                        path : 'coupons',
+                        element : <AdminCoupons />
+                    },
+                    {
+                        path : 'orders',
+                        element : <AdminOrders />
+                    },
+                    {
+                        path : 'settings',
+                        element : <AdminSettings />
+                    }
+                    
+                ]
+            }]
+
+        }]
     }
 ])

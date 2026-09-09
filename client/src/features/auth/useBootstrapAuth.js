@@ -27,19 +27,19 @@ export function useBootstrapAuth() {
             }
 
             try {
-                console.log("🔵 User signed in, syncing with backend...");
+                console.log("User signed in, syncing with backend...");
 
                 setLoading();
 
                 await syncUser();
 
-                console.log("🟢 User synced successfully");
+                console.log("User synced successfully");
 
                 const me = await getMe();
                 setUser(me?.user);
 
             } catch (error) {
-                console.error("🔴 Auth bootstrap error:", error);
+                console.error(" Auth bootstrap error:", error);
 
                 const errMessage =
                     error instanceof Error

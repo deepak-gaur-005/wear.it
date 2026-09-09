@@ -14,7 +14,7 @@ export function RoleGaurdLayout({allow}) {
         return <Navigate to="/sign-in" replace />;
     }
 
-    if (!allow.includes(user.roles)) {
+    if (!allow.includes(user.role)) {
         return <Navigate to="/" replace/>;
     }
 
