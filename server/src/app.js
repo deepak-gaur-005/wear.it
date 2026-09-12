@@ -9,6 +9,7 @@ import { errorHandler} from "./middlewares/errorHandler.middleware.js";
 
 import { clerkMiddleware } from "@clerk/express";
 import { authRouter } from "./routes/auth/auth.routes.js";
+import { adminProductRouter } from "./routes/admin/product.routes.js";
 
 
 const app = express();
@@ -44,6 +45,11 @@ app.get("/health", (req, res) => {
 
 //Auth Routes
 app.use("/auth", authRouter);
+
+// customer routes
+
+//admin routes
+app.use("/admin", adminProductRouter)
 
 //404 handler'
 app.use(notFound);

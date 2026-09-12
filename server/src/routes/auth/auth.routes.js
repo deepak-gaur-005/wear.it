@@ -62,6 +62,11 @@ authRouter.post(
             ? adminEmails.has(email.toLowerCase())
             : false;
 
+        console.log("ADMIN_EMAILS:", process.env.ADMIN_EMAILS);
+        console.log("CLERK EMAIL:", email);
+        console.log("SHOULD BE ADMIN:", shouldBeAdmin);
+        console.log("EXISTING ROLE:", existingUser?.role);
+
         const nextRole =
             existingUser?.role === "admin" 
                 ? "admin"
