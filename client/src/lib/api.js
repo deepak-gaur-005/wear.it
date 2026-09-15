@@ -56,8 +56,8 @@ function handleResponse(response) {
   if (!data.success) {
     throw new Error(
       data.message ||
-        data.errors?.[0]?.message ||
-        "Request failed"
+      data.errors?.[0]?.message ||
+      "Request failed"
     );
   }
 
