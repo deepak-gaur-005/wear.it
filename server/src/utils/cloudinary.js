@@ -34,7 +34,7 @@ export function uploadSingleBufferToCloudinary(
     })
 }
 
-export async function uploadManyyBuffersToCloudinary(
+export async function uploadManyBuffersToCloudinary(
     fileBuffers,
     folder = "wear.it/products"
 ){
