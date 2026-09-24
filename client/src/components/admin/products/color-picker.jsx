@@ -1,13 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { X } from "lucide-react";
+import { useState } from "react";
 
 const wrapperClass = "space-y-3";
 
 const headerClass = "space-y-1";
 
 const titleClass = "text-sm font-semibold text-foreground";
-
-const descriptionClass = "text-sm text-muted-foreground";
 
 const actionsRowClass = "flex flex-wrap items-center gap-3";
 
@@ -24,7 +24,8 @@ const removeIconClass =
   "h-3.5 w-3.5 text-muted-foreground group-hover:text-foreground";
 
 
-export function ColorPicker(){
+export function ColorPicker({colors =[], onAdd, onRemove}){
+    const [selectedColor, setSelectedColor] = useState("#111111");
 
     return (
         <div className={wrapperClass}>
@@ -34,13 +35,35 @@ export function ColorPicker(){
 
             <div className={actionsRowClass}>
                 <Input
+                value={selectedColor}
+                onChange={(event) => setSelectedColor(event.target.value)} // target html element, react auto call fun an EVENT OBJECT
                 type="color"
                 className={colorInputClass}
                 />
 
-                <Button type="button" variant="secondary">
+                <Button 
+                onClick={() => onAdd(selectedColor)}
+                type="button" 
+                variant="secondary">
                     Add Color
                 </Button>
+            </div>
+            <div className={colorsListClass}>
+                {colors.map((colorItem) => (
+                    <Button 
+                        key={colorItem}
+                        type="button"
+                        onClick={() => onRemove(colorItem)}
+                        className={colorChipClass}
+                    >
+                    <span
+                        className={colorDotClass}
+                        style={{ backgroundColor: colorItem }}
+                    />
+                    <X className={removeIconClass} />
+
+                    </Button>
+                ))}
             </div>
         </div>
     )

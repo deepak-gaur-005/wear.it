@@ -1,6 +1,8 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ImagePlus } from "lucide-react";
+import { Button } from "@base-ui/react";
+import { ImagePlus, Star, X } from "lucide-react";
+import { useEffect, useMemo } from "react";
 
 const wrapperClass = "space-y-4";
 
@@ -8,16 +10,12 @@ const headerClass = "space-y-1";
 
 const titleClass = "text-sm font-semibold text-foreground";
 
-const descriptionClass = "text-sm text-muted-foreground";
-
 const uploadLabelClass =
   "flex min-h-28 cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/40 px-4 py-6 text-center transition hover:bg-muted";
 
 const uploadIconClass = "mb-2 h-5 w-5 text-muted-foreground";
 
 const uploadTitleClass = "text-sm font-medium text-foreground";
-
-const uploadSubtitleClass = "mt-1 text-xs text-muted-foreground";
 
 const hiddenInputClass = "hidden";
 
@@ -40,7 +38,28 @@ const removeIconClass = "h-4 w-4";
 
 const fileNameClass = "p-2 text-xs text-muted-foreground";
 
-export function ImagePicker(){
+export function ImagePicker({
+    existingImages = [],
+    newFiles = [],
+    covderImagePublicId,
+    onFilesAdd,
+    onExistingRemove,
+    onCoverImageChange,
+}) {
+    const previewUrls = useMemo(
+        () => (newFiles ?? []).map((file) => ({ file, url: URL.createObjectURL(file) })),
+        [newFiles]
+    )
+
+    useEffect(() => {
+        return () => {
+           previewUrls.forEach((item) => {
+                URL.revokeObjectURL(item.url);
+           })
+        }
+    }, [previewUrls])
+ 
+    console.log(previewUrls, 'previewUrlspreviewUrls')
 
     return (
         <div className={wrapperClass}>
@@ -56,8 +75,75 @@ export function ImagePicker(){
                     accept="image/*"
                     multiple
                     className={hiddenInputClass}
+                    onChange={(event) => onFilesAdd(event.target.files)}
                 />
             </Label>
+
+            {existingImages.length > 0 ? (
+                <div className={sectionClass}>
+                    <p className={sectionTitleClass}> Existing Images </p>
+                    <div className={gridClass}>
+                        {existingImages.map((image) => {
+                            const isCover = covderImagePublicId === image.publicId;
+
+                            return (
+                                <div key={image.publicId} className={imageCardClass}>
+                                    <img src={image.url} alt="product" className={imageClass} />
+
+                                    < div className={imageActionsClass}>
+                                        <Button
+                                        type="button"
+                                        size="sm"
+                                        variant={isCover ? 'default':'secondary'}
+                                        onClick={() => onCoverImageChange(image.publicId)}
+                                        >
+                                            <Star className={starIconClass}/>
+                                            {
+                                                isCover ? 'Cover' : 'Set Cover'
+                                            }
+                                        </Button>
+
+                                        <Button 
+                                        type="button"
+                                        size="icon"
+                                        variant="ghost"
+                                        onClick={() => onExistingRemove(image.publicId)}
+                                        >
+                                            <X className={removeIconClass}/>
+                                        </Button>
+                                    </div>
+                                </div>
+
+                            )
+                        }
+                    )}
+                    </div>
+                </div>
+
+            ): null }
+
+            {previewUrls.length > 0 ? (
+                <div className={sectionClass}>
+                    <p className={sectionTitleClass}> New Uploads </p>
+                    <div className={gridClass}>
+                        {
+                            previewUrls.map((previewItem, index) => (
+                                <div key={`${previewItem.file.name}-${index}`}
+                                className={imageCardClass}
+                                >
+                                    <img
+                                    src={previewItem.url}
+                                    alt={previewItem.file.name}
+                                    className={imageClass}
+                                    />
+                                    < div className={fileNameClass}> {previewItem.file.name} </div>
+                                </div>
+                            ))
+                        }
+                    </div>
+                </div>
+                ) : null}
+            
         </div>
     );
 }
