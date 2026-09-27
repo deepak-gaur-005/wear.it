@@ -1,6 +1,6 @@
-import mongoose, { Schema } from "mongoose";
+import { mongoose, Schema } from "mongoose";
 
-const PromoSchema = new mongooose.Schema(
+const PromoSchema = new mongoose.Schema(
   {
     code: {
       type: String,
@@ -38,4 +38,4 @@ const PromoSchema = new mongooose.Schema(
 );
 
 export const Promo =
-  mongoose.models.Promo || mongooose.model("Promo", PromoSchema);
+  mongoose.models.Promo || mongoose.model("Promo", PromoSchema);

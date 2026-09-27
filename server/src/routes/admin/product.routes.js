@@ -1,13 +1,13 @@
 import { Router } from 'express';
+import multer from "multer";
 import { Category } from '../../models/category.model.js';
 import { Product } from '../../models/product.model.js';
-import { requireAdmin, requireAuth } from "../../middlewares/auth.middleware.js";
+import { requireAdmin, getDbUserFromReq, } from "../../middlewares/auth.middleware.js";
 import { asyncHandler } from "../../utils/AsyncHandler.js";
 import { requireFound, requireNumber, requireText } from '../../utils/helper.js';
-import { uploadManyyBuffersToCloudinary } from '../../utils/cloudinary.js';
+import { uploadManyBuffersToCloudinary } from '../../utils/cloudinary.js';
 import { ApiError } from '../../utils/ApiError.js';
 import { ApiResponse } from '../../utils/ApiResponse.js';
-import multer from "multer";
 
 export const adminProductRouter = Router();
 
@@ -29,7 +29,12 @@ adminProductRouter.get(
     "/categories",
     asyncHandler(async (_req, res) => {
         const categories = await Category.find({}).sort({ name: 1 });
-        res.json(ok(categories));
+        res.json(
+            ok(
+                categories,
+                "Categories fetched successfully"
+            )
+        );
     })
 );
 
@@ -41,7 +46,15 @@ adminProductRouter.post(
         requireText(name, "category name is needed");
 
         const category = await Category.create({ name });
-        res.status(201).json(ok(category));
+        res
+            .status(201)
+            .json(
+                new ApiResponse(
+                    201,
+                    category,
+                    "Category created successfully"
+                )
+            );
     })
 );
 
@@ -59,7 +72,12 @@ adminProductRouter.put(
         category.name = name;
         await category.save();
 
-        res.json(ok(category));
+        res.json(
+            ok(
+                category,
+                "Category updated successfully"
+            )
+        );
     })
 )
 
@@ -79,7 +97,12 @@ adminProductRouter.get(
             .populate("category", "name")
             .sort({ createdAt: -1 });
 
-        res.json(ok(products));
+        res.json(
+            ok(
+                products,
+                "Products fetched successfully"
+            )
+        );
     })
 );
 
@@ -95,9 +118,94 @@ adminProductRouter.get(
 
         requireFound(product, "Product not found", 404);
 
-        res.json(ok(product));
+        res.json(
+            ok(
+                foundProduct,
+                "Product fetched successfully"
+            )
+        );
     })
 );
+
+adminProductRouter.post(
+  "/products",
+  upload.array("images", 10),
+  asyncHandler(async (req, res) => {
+    const title = String(req.body.title || "").trim();
+    const description = String(req.body.description || "").trim();
+    const category = String(req.body.category || "").trim();
+    const brand = String(req.body.brand || "").trim();
+    const price = Number(req.body.price);
+    const salePercentage = Number(req.body.salePercentage || 0);
+    const stock = Number(req.body.stock);
+    const status = String(req.body.status || "active").trim();
+    const colors = req.body.colors || [];
+    const sizes = req.body.sizes || [];
+
+    requireText(title, "Title is required");
+    requireText(description, "Description is required");
+    requireText(category, "Category is required");
+    requireText(brand, "Brand is required");
+
+    requireNumber(price, "Price is required");
+    requireNumber(salePercentage, "Sale Percentage is required");
+    requireNumber(stock, "Stock is required");
+
+    const existingCategory = await Category.findById(category);
+
+    requireText(existingCategory, "Category not found", 404);
+
+    const files = req.files || [];
+
+    if (!files.length) {
+      throw new AppError(400, "At least one image is needed");
+    }
+
+    const uploadedImages = await uploadManyBuffersToCloudinary(
+      files.map((file) => file.buffer)
+    );
+
+    const images = uploadedImages.map((img, index) => ({
+      url: img.url,
+      publicId: img.publicId,
+      isCover: index === 0,
+    }));
+
+    const user = await getDbUserFromReq(req);
+
+    const product = await Product.create({
+      title,
+      description,
+      category,
+      brand,
+      images,
+      colors,
+      sizes,
+      price,
+      salePercentage,
+      stock,
+      status,
+      createdBy: user._id,
+    });
+
+    const createdProduct = await Product.findById(product._id).populate(
+      "category",
+      "name"
+    );
+
+    res
+        .status(201)
+        .json(
+            new ApiResponse(
+                201,
+                createdProduct,
+                "Product created successfully"
+            )
+         );
+  })
+);
+
+
 
 adminProductRouter.put(
   "/products/:id",
@@ -181,6 +289,11 @@ adminProductRouter.put(
         "name"
     );
 
-    res.json(ok(updatedProduct));
+    res.json(
+            ok(
+                updatedProduct,
+                "Product updated successfully"
+            )
+        );
   })
 );

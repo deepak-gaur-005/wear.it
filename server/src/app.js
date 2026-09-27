@@ -10,6 +10,11 @@ import { errorHandler} from "./middlewares/errorHandler.middleware.js";
 import { clerkMiddleware } from "@clerk/express";
 import { authRouter } from "./routes/auth/auth.routes.js";
 import { adminProductRouter } from "./routes/admin/product.routes.js";
+import { customerProductRouter } from "./routes/customer/product.routes.js";
+import { customerAddressRouter } from "./routes/customer/address.routes.js";
+import { adminPromoRouter } from "./routes/admin/promo.routes.js";
+import { customerPromoRouter } from "./routes/customer/promo.routes.js";
+import { customerCartWishlistRouter } from "./routes/customer/cart-wishlist.routes.js";
 
 
 const app = express();
@@ -47,9 +52,14 @@ app.get("/health", (req, res) => {
 app.use("/auth", authRouter);
 
 // customer routes
+app.use("customer", customerProductRouter);
+app.use("customer", customerAddressRouter);
+app.use("customer", customerPromoRouter);
+app.use("customer", customerCartWishlistRouter);
 
 //admin routes
 app.use("/admin", adminProductRouter)
+app.use("/admin", adminPromoRouter)
 
 //404 handler'
 app.use(notFound);
