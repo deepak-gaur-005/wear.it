@@ -109,5 +109,4 @@ OrderSchema.index({ user: 1, createdAt: -1 });
 OrderSchema.index({ orderStatus: 1, createdAt: -1 });
 OrderSchema.index({ paymentStatus: 1, createdAt: -1 });
 
-export const Order =
-  mongoose.models.Order || mongoose.model("Order", OrderSchema);
+export const Order = mongoose.models.Order || mongoose.model("Order", OrderSchema);

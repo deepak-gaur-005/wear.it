@@ -15,6 +15,13 @@ import { customerAddressRouter } from "./routes/customer/address.routes.js";
 import { adminPromoRouter } from "./routes/admin/promo.routes.js";
 import { customerPromoRouter } from "./routes/customer/promo.routes.js";
 import { customerCartWishlistRouter } from "./routes/customer/cart-wishlist.routes.js";
+import { customerCheckoutRouter } from "./routes/customer/checkout.routes.js";
+import { customerOrderRouter } from "./routes/customer/order.routes.js";
+import { customerCheckoutWithPointsRouter } from "./routes/customer/checkout-with-points.routes.js";
+import { customerHomeRouter } from "./routes/customer/home.routes.js";
+import { adminDashboardRouter } from "./routes/admin/dashboard.routes.js";
+import { adminOrderRouter } from "./routes/admin/order.routes.js";
+import { adminSettingsRouter } from "./routes/admin/settings.routes.js";
 
 
 const app = express();
@@ -56,10 +63,17 @@ app.use("customer", customerProductRouter);
 app.use("customer", customerAddressRouter);
 app.use("customer", customerPromoRouter);
 app.use("customer", customerCartWishlistRouter);
+app.use("customer", customerCheckoutRouter);
+app.use("customer", customerOrderRouter);
+app.use("customer", customerCheckoutWithPointsRouter);
+app.use("customer", customerHomeRouter);
 
 //admin routes
 app.use("/admin", adminProductRouter)
 app.use("/admin", adminPromoRouter)
+app.use("/admin", adminDashboardRouter)
+app.use("/admin", adminOrderRouter)
+app.use("/admin", adminSettingsRouter)
 
 //404 handler'
 app.use(notFound);

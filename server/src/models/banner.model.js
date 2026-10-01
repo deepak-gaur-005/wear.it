@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 
-const bannerSchema = new mongooose.Schema(
+const bannerSchema = new mongoose.Schema(
   {
     imageUrl: {
       type: String,
