@@ -60,3 +60,5 @@ export function useBootstrapAuth() {
         setUser,
     ]);
 }
+
+// useBootstrapAuth()-> is a custom React hook that runs when your app starts and performs the initial authentication setup.

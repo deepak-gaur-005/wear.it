@@ -7,6 +7,7 @@ export function useAdminProducts(){
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [productsError, setProductsError] = useState("");
     const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
     const [productDialogOpen, setProductDialogOpen] = useState(false);
     const [editingProduct, setEditingProduct] = useState(null)
@@ -18,12 +19,16 @@ export function useAdminProducts(){
 
     const loadProducts = useCallback(async (searchValue = "") => {
         setLoading(true);
+        setProductsError("");
 
         try {
         const data = await getAdminProducts(searchValue);
-        setProducts(data ?? []);
-        } catch {
-        console.log("fetching failed");
+        setProducts(Array.isArray(data) ? data : []);
+        } catch (error) {
+        console.error("Failed to load products:", error);
+        setProductsError(
+            error instanceof Error ? error.message : "Failed to load products"
+        );
         } finally {
         setLoading(false);
         }
@@ -32,6 +37,11 @@ export function useAdminProducts(){
 
     function openCreateDialog(){
         setEditingProduct(null)
+        setProductDialogOpen(true)
+    }
+
+    function openEditDialog(product){
+        setEditingProduct(product)
         setProductDialogOpen(true)
     }
 
@@ -84,6 +94,7 @@ export function useAdminProducts(){
         products,
         categories,
         loading,
+        productsError,
         refreshAll,
         categoryDialogOpen,
         setCategoryDialogOpen,
@@ -93,5 +104,6 @@ export function useAdminProducts(){
         setEditingProduct,
         openCreateDialog,
         closeProductDialog,
+        openEditDialog,
     };
 }

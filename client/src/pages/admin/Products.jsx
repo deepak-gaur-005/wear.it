@@ -1,5 +1,6 @@
 import { CategoryDialog } from "@/components/admin/products/category-dialog";
 import { ProductDialog } from "@/components/admin/products/product-dialog";
+import { ProductsTable } from "@/components/admin/products/product-table";
 import { ProductToolbar } from "@/components/admin/products/product-toolbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAdminProducts } from "@/features/admin/products/use-admin-products";
@@ -21,6 +22,7 @@ function AdminProducts() {
     products, 
     categories, 
     loading, 
+    productsError,
     refreshAll,
     categoryDialogOpen, 
     setCategoryDialogOpen, 
@@ -28,6 +30,7 @@ function AdminProducts() {
     setProductDialogOpen, 
     editingProduct, 
     openCreateDialog,
+    openEditDialog,
     closeProductDialog} = useAdminProducts()
 
   return (
@@ -45,7 +48,14 @@ function AdminProducts() {
           />
         </CardHeader>
 
-        <CardContent>Titles</CardContent>
+        <CardContent className={cardContentClass}>
+          <ProductsTable
+          loading={loading}
+          error={productsError}
+          products={products}
+          onEdit={openEditDialog}
+          />
+        </CardContent>
       </Card> 
 
       <CategoryDialog
@@ -55,8 +65,8 @@ function AdminProducts() {
       onSaved={refreshAll}
       />
 
-      <ProductDialog
-      open={productDialogOpen}
+      {productDialogOpen ? <ProductDialog
+      key={editingProduct?._id ?? "new"}
       onOpenChange={(open)=> {
         if(!open){
           closeProductDialog();
@@ -65,7 +75,9 @@ function AdminProducts() {
         setProductDialogOpen(true)
       }}
       categories={categories}
-      />
+      product={editingProduct}
+      onSaved={refreshAll}
+      /> : null}
     </div>
   )
 }

@@ -116,7 +116,7 @@ adminProductRouter.get(
             "name"
         );
 
-        requireFound(product, "Product not found", 404);
+        const foundProduct = requireFound(product, "Product not found", 404);
 
         res.json(
             ok(
@@ -153,17 +153,37 @@ adminProductRouter.post(
 
     const existingCategory = await Category.findById(category);
 
-    requireText(existingCategory, "Category not found", 404);
+    requireFound(existingCategory, "Category not found", 404);
 
     const files = req.files || [];
 
     if (!files.length) {
-      throw new AppError(400, "At least one image is needed");
+      throw new ApiError(400, "At least one image is needed");
     }
 
-    const uploadedImages = await uploadManyBuffersToCloudinary(
-      files.map((file) => file.buffer)
-    );
+    let uploadedImages;
+
+    try {
+      uploadedImages = await uploadManyBuffersToCloudinary(
+        files.map((file) => file.buffer)
+      );
+    } catch (error) {
+      console.error("Cloudinary product image upload failed:", error);
+
+      if (error?.http_code === 403) {
+        console.error("Cloudinary upload error details:", error);
+
+        throw new ApiError(
+          502,
+          "Cloudinary rejected the image upload (403). Check your Cloudinary account upload permissions."
+        );
+      }
+
+      throw new ApiError(
+        502,
+        "Product image upload failed. Check the server's Cloudinary configuration and try again."
+      );
+    }
 
     const images = uploadedImages.map((img, index) => ({
       url: img.url,
@@ -240,7 +260,7 @@ adminProductRouter.put(
     const product = requireFound(productDoc, "Product not found");
 
     const files = req.files || [];
-    const uploadNewImages = await uploadManyyBuffersToCloudinary(
+    const uploadNewImages = await uploadManyBuffersToCloudinary(
         files.map((file) => file.buffer)
     );
 

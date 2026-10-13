@@ -60,7 +60,7 @@ function buildProductFormData(body,files){ //FormData allows us to send, text fi
 export async function createAdminProduct(body, files) {
 
     const formData = buildProductFormData(body, files);
-    return apiPost("/admin/products/", formData);
+    return apiPost("/admin/products", formData);
 } //Create a completely new product
 
 export async function updateAdminProduct(productId, body,files) {
