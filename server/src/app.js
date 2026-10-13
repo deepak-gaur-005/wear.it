@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import morgan from "morgan";
+import mongoose from "mongoose";
 
 import { ApiResponse } from "./utils/ApiResponse.js";
 import { notFound } from "./middlewares/notFound.middleware.js";
@@ -45,13 +46,21 @@ app.use(clerkMiddleware());
 
 //health check
 app.get("/health", (req, res) => {
-    res.status(200).json({
-        statusCode: 200,
+    const databaseConnected = mongoose.connection.readyState === 1;
+    const statusCode = databaseConnected ? 200 : 503;
+
+    res.status(statusCode).json({
+        statusCode,
         data: {
-            message: "server is healthy",
+            message: databaseConnected
+                ? "server is healthy"
+                : "database is unavailable",
+            database: databaseConnected ? "connected" : "unavailable",
         },
-        message: "Success",
-        success: true,
+        message: databaseConnected
+            ? "Success"
+            : "Database unavailable",
+        success: databaseConnected,
     });
 });
 

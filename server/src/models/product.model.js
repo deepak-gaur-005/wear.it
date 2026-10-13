@@ -12,6 +12,10 @@ const productImageSchema = new mongoose.Schema(
             required: true,
             trim: true,
         },
+        isCover: {
+            type: Boolean,
+            default: false,
+        },
     },
     { _id: false}
 );
@@ -28,7 +32,7 @@ const ProductSchema = new mongoose.Schema(
             required: true,
             trim: true,
         },
-        Category: {
+        category: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Category",
             required: true,
@@ -71,7 +75,7 @@ const ProductSchema = new mongoose.Schema(
         },
         createdBy: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "user",
+            ref: "User",
             required: true,
         }, 
     },
