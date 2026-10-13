@@ -11,7 +11,7 @@ import { StoreHome } from "./pages/customer/Home";
 import { RoleGaurdLayout } from "./components/auth/RoleGuardLayout";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminProducts from "./pages/admin/Products";
-import AdminCoupons from "./pages/admin/Coupons";
+import AdminCoupons from "./pages/admin/Promos";
 import AdminOrders from "./pages/admin/Order";
 import AdminSettings from "./pages/admin/Settings";
 import { AdminLayout } from "./components/layout/AdminLayout";

@@ -24,7 +24,7 @@ const editCellWrapClass = "flex justify-end";
 
 const editIconClass = "h-4 w-4";
 
-export function ProductsTable({products, onEdit, loading}){
+export function ProductsTable({products, onEdit, loading, error}){
     return (
         <div className={wrapperClass}>
             <Table>
@@ -47,6 +47,12 @@ export function ProductsTable({products, onEdit, loading}){
                                 Loading Products...
                             </TableCell>
                         </TableRow>
+                    ) : error ? (
+                        <TableRow>
+                            <TableCell colSpan={8} className={stateCellClass} role="alert">
+                                Could not load products: {error}
+                            </TableCell>
+                        </TableRow>
                     ) : products.length === 0 ? (
                         <TableRow>
                             <TableCell colSpan={8} className={stateCellClass}>
@@ -55,7 +61,7 @@ export function ProductsTable({products, onEdit, loading}){
                         </TableRow>
                     ) : (
                         products.map((product) => {
-                            const cover = getCoverImage(product.image);
+                            const cover = getCoverImage(product.images ?? []);
 
                             return (
                                 <TableRow key={product._id}>

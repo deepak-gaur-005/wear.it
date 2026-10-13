@@ -129,11 +129,13 @@ export function CustomerNavbar () {
           {/*Account*/}
           {isSignedIn ? (
             <DropdownMenu>
-              <DropdownMenuTrigger>
-                <Button variant="ghost" className={dropdownButton}>
-                  <user className="h-4.5 w-4.5" />
-                  Account
-                </Button>
+              <DropdownMenuTrigger
+                render={
+                  <Button variant="ghost" className={dropdownButton} />
+                }
+              >
+                <User className="h-4.5 w-4.5" />
+                Account
               </DropdownMenuTrigger>
 
               <DropdownMenuContent
@@ -141,13 +143,9 @@ export function CustomerNavbar () {
               className={accountDropdownContent}
               >
                 {/*My account*/}
-                <DropdownMenuItem 
-                  asChild
-                  className={dropdownItemLink}
-                >
+                <DropdownMenuItem className={dropdownItemLink}>
                   <User className="h-4 w-4"/>
                   <span> My Account</span>
-
                 </DropdownMenuItem>
 
                 {/*My Orders*/}

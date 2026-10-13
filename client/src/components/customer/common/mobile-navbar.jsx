@@ -104,14 +104,12 @@ export function CustomerMobileNavbar({ isSignedIn }) {
       </Link>
 
       <Sheet>
-        <SheetTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className={menuButton}
-          >
-            <Menu className="h-5 w-5" />
-          </Button>
+        <SheetTrigger
+          render={
+            <Button variant="ghost" size="icon" className={menuButton} />
+          }
+        >
+          <Menu className="h-5 w-5" />
         </SheetTrigger>
 
         <SheetContent

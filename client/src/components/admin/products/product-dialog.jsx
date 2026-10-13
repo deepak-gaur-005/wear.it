@@ -31,11 +31,10 @@ const statusItemClass = "flex items-center space-x-2";
 const actionsRowClass = "flex justify-end gap-3";
 
 
-export function ProductDialog({
-open, onOpenChange, categories, product, onSaved
-}) {
+export function ProductDialog({ onOpenChange, categories, product, onSaved }) {
     const {form, 
         saving, 
+        error,
         isEditMode, 
         updateField, 
         toggleSize, 
@@ -46,13 +45,12 @@ open, onOpenChange, categories, product, onSaved
         removeExistingImage,
         changeCoverImage,
     } = useProductform({
-        open, 
         onClose : () => onOpenChange(false), 
         onSaved, 
         product
     })
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
+        <Dialog open={true} onOpenChange={onOpenChange}>
             <DialogContent className={dialogContentClass}>
                 <DialogHeader>
                     <DialogTitle> 
@@ -187,6 +185,11 @@ open, onOpenChange, categories, product, onSaved
                     />
 
                     <div className={actionsRowClass}>
+                        {error ? (
+                            <p className="mr-auto text-sm text-destructive" role="alert">
+                                {error}
+                            </p>
+                        ) : null}
                         <Button variant="outline" onClick={() => onOpenChange(false)}>
                             Cancel
                         </Button>

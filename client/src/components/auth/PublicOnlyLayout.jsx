@@ -1,6 +1,7 @@
 import { useAuthStore } from "@/features/auth/store";
 import { useAuth } from "@clerk/react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { CommonLoader } from "../common/loader";
 
 
 export function PublicOnlyLayout() {
@@ -13,7 +14,7 @@ export function PublicOnlyLayout() {
     }
     
     if (isSignedIn && (!isBootstrapped || status == "loading")) {
-        return null
+        return <CommonLoader />;
     }
 
     if ( 
