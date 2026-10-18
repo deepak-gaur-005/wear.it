@@ -166,6 +166,7 @@ function CustomerProfileDialog() {
               ) : null}
             </section>
 
+            {/*Form render here*/}
             {showForm ? (
               <section className={formWrapClass}>
                 <h3 className={sectionTitleClass}>

@@ -129,11 +129,13 @@ function Collections() {
           {/* Mobile filter sheet */}
           <div className={topBarActionsClass}>
             <Sheet>
-              <SheetTrigger asChild>
-                <Button className={mobileFilterButtonClass}>
+              <SheetTrigger
+                render={
+                  <Button className={mobileFilterButtonClass} />
+                }
+              >
                   <SlidersHorizontal className={mobileFilterIconClass} />
                   Filters
-                </Button>
               </SheetTrigger>
 
               <SheetContent

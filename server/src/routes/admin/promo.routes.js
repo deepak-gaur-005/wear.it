@@ -114,7 +114,7 @@ adminPromoRouter.get('/promos',
             .json(
                 new ApiResponse(
                     200,
-                    { item },
+                    { items },
                     "Promos fetched successfully"
                 )
             )
@@ -208,7 +208,7 @@ adminPromoRouter.patch('/promos/:promoId',
     })
 )
 
-adminPromoRouter.delete('/promos',
+adminPromoRouter.delete('/promos/:promoId',
 
     asyncHandler(async (req, res) => {
 

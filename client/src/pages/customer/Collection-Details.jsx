@@ -93,11 +93,14 @@ function CollectionDetails() {
     <div className={pageWrapClass}>
       <section className={heroSectionClass}>
         <div className={heroContainerClass}>
-          <Button asChild variant="ghost" className={backButtonClass}>
-            <Link to="/collections">
+          <Button
+            render={<Link to="/collections" />}
+            nativeButton={false}
+            variant="ghost"
+            className={backButtonClass}
+          >
               <ArrowLeft className={backIconClass} />
               Back to Collections
-            </Link>
           </Button>
 
           <div className={heroContentClass}>

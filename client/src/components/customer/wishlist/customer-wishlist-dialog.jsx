@@ -96,16 +96,17 @@ function CustomerWishlistDialog() {
 
                     <div className={actionsClass}>
                       <Button
-                        asChild
+                        render={
+                          <Link
+                            onClick={() => setOpen(false)}
+                            to={`/collection/${item.productId}`}
+                          />
+                        }
+                        nativeButton={false}
                         variant="default"
                         className={buttonClass}
                       >
-                        <Link
-                          onClick={() => setOpen(false)}
-                          to={`/collection/${item.productId}`}
-                        >
-                          View
-                        </Link>
+                        View
                       </Button>
 
                       <Button

@@ -90,11 +90,11 @@ export function CustomerNavbar () {
     void loadCart(Boolean(isSignedIn));
     void loadPoints(Boolean(isSignedIn));
 
-    // if (!isSignedIn) {
-    //   clearWishlist();
-    //   clearProfile();
-    //   return;
-    // }
+    if (!isSignedIn) {
+      clearWishlist();
+      clearProfile();
+      return;
+    }
     void loadWishlist();
   }, [clearWishlist, isBootstrapped, isLoaded, isSignedIn, loadWishlist, loadCart, loadPoints, clearProfile])
 
@@ -158,11 +158,11 @@ export function CustomerNavbar () {
                   <span>My Account</span>
                 </DropdownMenuItem>
 
-                <DropdownMenuItem asChild>
-                  <Link to = {"/account"} className = {dropdownItemLink}>
+                <DropdownMenuItem
+                  render={<Link to="/account" className={dropdownItemLink} />}
+                >
                     <ShoppingBasket className="h-4 w-4"/>
                     <span> My Orders </span>
-                  </Link>
                 </DropdownMenuItem>
 
                 <DropdownMenuItem
