@@ -68,14 +68,14 @@ app.get("/health", (req, res) => {
 app.use("/auth", authRouter);
 
 // customer routes
-app.use("customer", customerProductRouter);
-app.use("customer", customerAddressRouter);
-app.use("customer", customerPromoRouter);
-app.use("customer", customerCartWishlistRouter);
-app.use("customer", customerCheckoutRouter);
-app.use("customer", customerOrderRouter);
-app.use("customer", customerCheckoutWithPointsRouter);
-app.use("customer", customerHomeRouter);
+app.use("/customer", customerProductRouter);
+app.use("/customer", customerAddressRouter);
+app.use("/customer", customerPromoRouter);
+app.use("/customer", customerCartWishlistRouter);
+app.use("/customer", customerCheckoutRouter);
+app.use("/customer", customerOrderRouter);
+app.use("/customer", customerCheckoutWithPointsRouter);
+app.use("/customer", customerHomeRouter);
 
 //admin routes
 app.use("/admin", adminProductRouter)
