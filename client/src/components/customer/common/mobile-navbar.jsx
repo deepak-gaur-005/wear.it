@@ -66,14 +66,26 @@ function DrawerSection({ title, items }) {
           const Icon = item.icon;
 
           return (
-            <Link
-              key={item.label}
-              to={item.href}
-              className={drawerItemLink}
-            >
-              <Icon className="h-4.5 w-4.5" />
-              <span>{item.label}</span>
-            </Link>
+            item.onClick ? (
+              <button
+                key={item.label}
+                type="button"
+                onClick={item.onClick}
+                className={drawerItemLink}
+              >
+                <Icon className="h-4.5 w-4.5" />
+                <span>{item.label}</span>
+              </button>
+            ) : (
+              <Link
+                key={item.label}
+                to={item.href}
+                className={drawerItemLink}
+              >
+                <Icon className="h-4.5 w-4.5" />
+                <span>{item.label}</span>
+              </Link>
+            )
           );
         })}
       </div>
@@ -81,12 +93,12 @@ function DrawerSection({ title, items }) {
   );
 }
 
-export function CustomerMobileNavbar({ isSignedIn }) {
+export function CustomerMobileNavbar({ isSignedIn, onSignOut }) {
   const mobileAccountItems = isSignedIn
     ? [
-        { label: "Account", href: "/account", icon: User },
+        { label: "Account", href: "/profile", icon: User },
         { label: "Wishlist", href: "/wishlist", icon: Heart },
-        { label: "Sign Out", href: "/logout", icon: LogOut },
+        { label: "Sign Out", icon: LogOut, onClick: onSignOut },
       ]
     : [
         {

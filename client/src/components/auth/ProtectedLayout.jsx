@@ -2,7 +2,6 @@ import { useAuthStore } from "@/features/auth/store";
 import { useAuth } from "@clerk/react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { CommonLoader } from "../common/loader";
-//import { Commonloader } from "../common/Loader";
 
 export function ProtectedLayout() {
     const { isLoaded, isSignedIn } = useAuth();

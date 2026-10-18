@@ -15,6 +15,9 @@ import AdminCoupons from "./pages/admin/Promos";
 import AdminOrders from "./pages/admin/Order";
 import AdminSettings from "./pages/admin/Settings";
 import { AdminLayout } from "./components/layout/AdminLayout";
+import Collections from "./pages/customer/collections";
+import { CustomerWishlist } from "./pages/customer/Wishlist";
+import CollectionDetails from "./pages/customer/Collection-Details";
 
 export const router = createBrowserRouter([
     {
@@ -39,11 +42,23 @@ export const router = createBrowserRouter([
                 ],
             },
             {
+                path: "collections",
+                element: <Collections />,
+            },
+            {
+                path: "collection/:id",
+                element: <CollectionDetails />,
+            },
+            {
                 element : <ProtectedLayout/>,
                 children : [
                     {
                         path: 'profile',
                         element : <CustomerProfile/>
+                    },
+                    {
+                        path: 'wishlist',
+                        element: <CustomerWishlist />,
                     }
                 ]
             }

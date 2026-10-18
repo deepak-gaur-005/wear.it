@@ -10,7 +10,7 @@ export function PublicOnlyLayout() {
     const location = useLocation();
 
     if (!isLoaded) {
-        return null;
+        return <CommonLoader text="Loading sign in..." />;
     }
     
     if (isSignedIn && (!isBootstrapped || status == "loading")) {
