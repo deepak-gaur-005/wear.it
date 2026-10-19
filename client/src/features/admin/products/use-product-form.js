@@ -88,7 +88,7 @@ export function useProductform({
             ? prev.colors
             : [...prev.colors, color],
         }));
-  }
+    }
 
     function removeColor(color){
         setForm((prev) => ({

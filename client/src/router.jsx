@@ -1,23 +1,25 @@
 import { createBrowserRouter } from "react-router-dom";
 
 import { CustomerLayout } from "./components/layout/CustomerLayout";
+import { AdminLayout } from "./components/layout/AdminLayout";
+
 import { PublicOnlyLayout } from "./components/auth/PublicOnlyLayout"
 import { ProtectedLayout } from "./components/auth/ProtectedLayout";
+import { RoleGaurdLayout } from "./components/auth/RoleGuardLayout";
 
-import { CustomerProfile } from "./pages/customer/Profile";
+// import { CustomerProfile } from "./pages/customer/Profile";
 import { SignInPage } from "./pages/auth/Sign-in";
 import { SignUpPage } from "./pages/auth/Sign-up";
 import { StoreHome } from "./pages/customer/Home";
-import { RoleGaurdLayout } from "./components/auth/RoleGuardLayout";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminProducts from "./pages/admin/Products";
 import AdminCoupons from "./pages/admin/Promos";
 import AdminOrders from "./pages/admin/Order";
 import AdminSettings from "./pages/admin/Settings";
-import { AdminLayout } from "./components/layout/AdminLayout";
+
 import Collections from "./pages/customer/collections";
-import { CustomerWishlist } from "./pages/customer/Wishlist";
 import CollectionDetails from "./pages/customer/Collection-Details";
+import CustomerOrderSuccessPage from "./pages/customer/Order-Success";
 
 export const router = createBrowserRouter([
     {
@@ -39,27 +41,23 @@ export const router = createBrowserRouter([
                         path: "sign-up/*",
                         element: <SignUpPage />,
                     },
+                    {
+                        path: "collections",
+                        element: <Collections />,
+                    },
+                    {
+                        path: "collection/:id",
+                        element: <CollectionDetails />,
+                    },
                 ],
-            },
-            {
-                path: "collections",
-                element: <Collections />,
-            },
-            {
-                path: "collection/:id",
-                element: <CollectionDetails />,
             },
             {
                 element : <ProtectedLayout/>,
                 children : [
-                    {
-                        path: 'profile',
-                        element : <CustomerProfile/>
-                    },
-                    {
-                        path: 'wishlist',
-                        element: <CustomerWishlist />,
-                    }
+                   {
+                        path: "order-success",
+                        element: <CustomerOrderSuccessPage />,
+                    }, 
                 ]
             }
 

@@ -3,9 +3,8 @@ import { env } from "./env";
 
 let tokenGetter = null;
 
-/**
- * Registers Clerks token retrieval function with our API utility.
- */
+//  Registers Clerks token retrieval function with our API utility.
+ 
 
 export function setApiTokenGetter(getter) {
     tokenGetter = getter;
