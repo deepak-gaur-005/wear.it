@@ -236,12 +236,12 @@ customerCheckoutRouter.post(
         const orderId = String( req.body.orderId || "").trim();
         const razorpayPaymentId = String(req.body.razorpay_payment_id || "").trim();
         const razorpayOrderId = String( req.body.razorpay_order_id || "" ).trim();
-        const razorpaySignature = String( req.body.razorpay_signature || "" ).trim();
+        const razorpay_signature = String( req.body.razorpay_signature || "" ).trim();
 
         requireText(orderId,"Order id is needed");
         requireText(razorpayPaymentId, "razorpayPaymentId is needed");
         requireText( razorpayOrderId, "razorpayOrderId is needed");
-        requireText( razorpaySignature, "razorpaySignature is needed");
+        requireText( razorpay_signature, "razorpay_signature is needed");
 
         // Find the order and make sure it belongs to the currently authenticated customer.
         const order = await Order.findOne({_id: orderId,user: dbUser._id, });
@@ -284,7 +284,7 @@ customerCheckoutRouter.post(
         const signature = crypto.createHmac( "sha256", process.env.RAZORPAY_KEY_SECRET || "") //createHnac creates a crypto graphic signature
                 .update(`${razorpayOrderId}|${razorpayPaymentId}`)
                 .digest("hex"); //Finishes HMAC calculation and returns the result as a hexadecimal string
-        if (signature !== razorpaySignature) {
+        if (signature !== razorpay_signature) {
             throw new ApiError(
                 400,
                 "Invalid payment signature"

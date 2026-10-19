@@ -9,7 +9,6 @@ import { useAdminPromos } from "@/features/admin/promo/use-admin-promo";
 const pageWrapClass = "space-y-6 p-6";
 const cardClass = "border-border bg-card shadow-sm";
 const cardHeaderClass = "space-y-4";
-const cardTitleClass = "text-xl";
 
 function AdminPromos() {
   const {

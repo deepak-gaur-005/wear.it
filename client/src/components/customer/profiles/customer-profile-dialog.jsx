@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import useCustomerCartAndCheckoutStore from "@/features/customer/cart-and-ckeckout/store";
+import { useCustomerCartAndCheckoutStore } from "@/features/customer/cart-and-ckeckout/store";
 import { useCustomerProfileStore } from "@/features/customer/profile/store";
 import { useUser } from "@clerk/react";
 import { Pencil, Plus, Trash2 } from "lucide-react";
@@ -32,7 +32,6 @@ const singleGridClass = "grid gap-6";
 const sectionClass = "space-y-4";
 const sectionHeaderClass = "flex items-center justify-between gap-3";
 const sectionTitleClass = "text-lg font-semibold text-foreground";
-const sectionTextClass = "text-sm text-muted-foreground";
 
 const listClass = "space-y-3";
 const itemClass = "space-y-3 border border-border/60 bg-card/80 p-4";
@@ -48,7 +47,7 @@ const emptyClass = "text-sm text-muted-foreground";
 
 const formWrapClass = "space-y-4 border border-border/60 bg-card/80 p-5";
 const twoColumnClass = "grid gap-4 sm:grid-cols-2";
-const threeColumnClass = "grid gap-4 sm:grid-cols-3";
+
 const fieldClass = "space-y-2";
 const inputClass = "rounded-none";
 const checkboxRowClass =

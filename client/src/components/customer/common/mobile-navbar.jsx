@@ -93,7 +93,12 @@ function DrawerSection({ title, items }) {
   );
 }
 
-export function CustomerMobileNavbar({ isSignedIn, onSignOut }) {
+export function CustomerMobileNavbar({
+  isSignedIn,
+  onSignOut,
+  onCartOpen,
+  cartCount,
+}) {
   const mobileAccountItems = isSignedIn
     ? [
         { label: "Account", href: "/profile", icon: User },
@@ -110,10 +115,15 @@ export function CustomerMobileNavbar({ isSignedIn, onSignOut }) {
 
   return (
     <div className={mobileWrap}>
-      <Link to="/cart" className={iconLink}>
+      <button
+        type="button"
+        onClick={onCartOpen}
+        className={iconLink}
+        aria-label={`Open cart, ${cartCount} items`}
+      >
         <ShoppingCart className="h-4.5 w-4.5" />
-        <span className={cartBadge}>{0}</span>
-      </Link>
+        <span className={cartBadge}>{cartCount}</span>
+      </button>
 
       <Sheet>
         <SheetTrigger

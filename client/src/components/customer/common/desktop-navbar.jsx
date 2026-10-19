@@ -9,7 +9,7 @@ import { useCustomerWishlistStore } from "@/features/customer/wishlist/store";
 import { useEffect } from "react";
 import { useAuthStore } from "@/features/auth/store";
 import { useCustomerProfileStore } from "@/features/customer/profile/store";
-import useCustomerCartAndCheckoutStore from "@/features/customer/cart-and-ckeckout/store";
+import { useCustomerCartAndCheckoutStore } from "@/features/customer/cart-and-ckeckout/store";
 
 const collectionsPage = {
   label: "Collections",
@@ -73,13 +73,16 @@ export function CustomerNavbar () {
   const { isSignedIn, signOut, isLoaded } = useAuth();
   const { isBootstrapped } = useAuthStore();
 
-  const { items: wishlistItems, loadWishlist, clear: clearWishlist, setOpen: setWishListOpen } = useCustomerWishlistStore((state) => state);
+  const {
+    items: wishlistItems,
+    loadWishlist,
+    clear: clearWishlist,
+    setOpen: setWishListOpen,
+  } = useCustomerWishlistStore((state) => state);
 
   const { clear: clearProfile } = useCustomerProfileStore((state) => state);
 
-  const { setOpen, cart, loadCart, loadPoints } = useCustomerCartAndCheckoutStore(
-    (state) => state,
-  );
+  const { setOpen, cart, loadCart } = useCustomerCartAndCheckoutStore( (state) => state );
 
   // const { openOrders } = useCustomerOrdersStore((state) => state);
 
@@ -88,7 +91,6 @@ export function CustomerNavbar () {
     if( !isLoaded || !isBootstrapped) return;
 
     void loadCart(Boolean(isSignedIn));
-    void loadPoints(Boolean(isSignedIn));
 
     if (!isSignedIn) {
       clearWishlist();
@@ -96,7 +98,7 @@ export function CustomerNavbar () {
       return;
     }
     void loadWishlist();
-  }, [clearWishlist, isBootstrapped, isLoaded, isSignedIn, loadWishlist, loadCart, loadPoints, clearProfile])
+  }, [clearWishlist, isBootstrapped, isLoaded, isSignedIn, loadWishlist, loadCart, clearProfile])
 
   const wishlistCount = wishlistItems.length;
 
@@ -188,12 +190,10 @@ export function CustomerNavbar () {
             type="button"
             onClick={() => setOpen(true)}
             className={iconLink}
+            aria-label={`Open cart, ${cart?.totalQuantity ?? 0} items`}
           >
-            <ShoppingCart className="h-[18px] w-[18px]" />
-
-            <span className={cartBadge}>
-              {cart?.totalQuantity ?? 0}
-            </span>
+            <ShoppingCart className="h-4.5 w-4.5" />
+            <span className={cartBadge}>{cart?.totalQuantity ?? 0}</span>
           </button>
 
         </nav>
@@ -201,6 +201,8 @@ export function CustomerNavbar () {
         <CustomerMobileNavbar
           isSignedIn={Boolean(isSignedIn)}
           onSignOut={signOut}
+          onCartOpen={() => setOpen(true)}
+          cartCount={cart?.totalQuantity ?? 0}
         />
 
       </div>

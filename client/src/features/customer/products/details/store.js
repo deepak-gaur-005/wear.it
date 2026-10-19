@@ -7,7 +7,7 @@ import {
   removeCustomerWishlistItem,
 } from "../../wishlist/api";
 import { useCustomerWishlistStore } from "../../wishlist/store";
-import useCustomerCartAndCheckoutStore from "../../cart-and-ckeckout/store";
+import { useCustomerCartAndCheckoutStore } from "../../cart-and-ckeckout/store";
 
 const defaultState = {
   loading: true,

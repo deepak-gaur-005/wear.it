@@ -1,5 +1,6 @@
 import { Outlet } from "react-router-dom";
 import { CustomerNavbar } from "../customer/common/desktop-navbar";
+import CustomerCartAndCheckoutDrawer from "../customer/cart-and-checkout/customer-cart-and-checkout-drawer";
 import CustomerWishlistDialog from "../customer/wishlist/customer-wishlist-dialog";
 
 export function CustomerLayout() {
@@ -7,6 +8,7 @@ export function CustomerLayout() {
         <div className="min-h-screen bg-background text-foreground">
             <CustomerNavbar />
             <CustomerWishlistDialog />
+            <CustomerCartAndCheckoutDrawer />
             <main className="mx-auto max-w-7xl px-4 py-8">
                 <Outlet />
             </main>

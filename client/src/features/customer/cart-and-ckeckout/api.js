@@ -1,44 +1,84 @@
 import { apiDelete, apiGet, apiPatch, apiPost } from "@/lib/api";
+import { getCustomerAddresses } from "../profile/api";
 
-function variantConfig(color, size) {
-  const params = {};
-  if (color) params.color = color;
-  if (size) params.size = size;
-  return { params };
+function buildCartItemUrl(item, action) {
+  const searchParams = new URLSearchParams();
+
+  if (item.color) searchParams.set("color", item.color);
+  if (item.size) searchParams.set("size", item.size);
+
+  const query = searchParams.toString();
+  const actionPath = action ? `/${action}` : "";
+  const path = `/customer/cart/items/${item.productId}${actionPath}`;
+
+  return query ? `${path}?${query}` : path;
 }
 
-export function getCustomerCart() {
+export async function getCustomerCart() {
   return apiGet("/customer/cart");
 }
 
-export function addCustomerCartItem({ productId, quantity, color, size }) {
-  return apiPost("/customer/cart/items", {
-    productId,
-    quantity,
-    color,
-    size,
-  });
+export async function addCustomerCartItem(body) {
+  return apiPost("/customer/cart/items", body);
 }
 
-export function syncCustomerCart(items) {
-  return apiPost("/customer/cart/sync", { items });
+export async function increaseCustomerCartItem(item) {
+  return apiPatch(buildCartItemUrl(item, "increase"));
 }
 
-export function increaseCustomerCartItem(productId, color, size) {
-  return apiPatch(
-    `/customer/cart/items/${encodeURIComponent(productId)}/increase`,
-    {},
-    variantConfig(color, size),
-  );
+export async function decreaseCustomerCartItem(item) {
+  return apiPatch(buildCartItemUrl(item, "decrease"));
 }
 
-export function removeCustomerCartItem(productId, color, size) {
-  return apiDelete(
-    `/customer/cart/items/${encodeURIComponent(productId)}`,
-    variantConfig(color, size),
-  );
+export async function removeCustomerCartItem(item) {
+  return apiDelete(buildCartItemUrl(item));
 }
 
-export function getCustomerPoints() {
+export async function syncCustomerCart(body) {
+  return apiPost("/customer/cart/sync", body);
+}
+
+// Checkout APIs
+
+export async function getCheckoutPoints() {
   return apiGet("/customer/checkout/points");
+}
+
+export async function getCheckoutData() {
+  const [cart, addresses, checkoutPoints] = await Promise.all([
+    getCustomerCart(),
+    getCustomerAddresses(),
+    getCheckoutPoints(),
+  ]);
+
+  const safeCart = cart ?? { items: [], totalQuantity: 0 };
+  const safeAddresses = addresses ?? { items: [] };
+
+  const subtotal = safeCart.items.reduce(
+    (sum, item) => sum + item.finalPrice * item.quantity,
+    0,
+  );
+
+  return {
+    cart: safeCart,
+    addresses: safeAddresses,
+    subtotal,
+    points: checkoutPoints.points ?? 0,
+  };
+}
+
+export async function applyCustomerPromo(body) {
+  return apiPost("/customer/promos/apply", body);
+}
+
+export async function createCheckoutSession(body) {
+  return apiPost("/customer/checkout/create-session", body);
+}
+
+export async function payWithPointsCheckout(body) {
+  return apiPost("/customer/checkout/pay-with-points", body);
+}
+
+export async function confirmCheckout(body) {
+  return apiPost("/customer/checkout/confirm", body);
 }
