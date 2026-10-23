@@ -14,8 +14,10 @@ export const useCustomerOrdersStore = create((set, get) => ({
       const response = await getCustomerOrders();
 
       set({ items: response?.items ?? [] });
-    } catch {
-      set({ items: [] });
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to load your orders",
+      );
     } finally {
       set({ loading: false });
     }
@@ -51,8 +53,11 @@ export const useCustomerOrdersStore = create((set, get) => ({
             : item,
         ),
       }));
-    } catch {
-      toast.error("Failed to return order");
+      toast.success("Order returned successfully");
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to return order",
+      );
     }
   },
 }));

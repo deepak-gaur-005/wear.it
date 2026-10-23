@@ -9,6 +9,7 @@ import { useCustomerWishlistStore } from "@/features/customer/wishlist/store";
 import { useEffect } from "react";
 import { useAuthStore } from "@/features/auth/store";
 import { useCustomerProfileStore } from "@/features/customer/profile/store";
+import { useCustomerOrdersStore } from "@/features/customer/orders/store";
 import { useCustomerCartAndCheckoutStore } from "@/features/customer/cart-and-ckeckout/store";
 
 const collectionsPage = {
@@ -80,11 +81,14 @@ export function CustomerNavbar () {
     setOpen: setWishListOpen,
   } = useCustomerWishlistStore((state) => state);
 
-  const { clear: clearProfile } = useCustomerProfileStore((state) => state);
+  const { clear: clearProfile, openProfile } = useCustomerProfileStore(
+    (state) => state,
+  );
+  const { clear: clearOrders, openOrders } = useCustomerOrdersStore(
+    (state) => state,
+  );
 
   const { setOpen, cart, loadCart } = useCustomerCartAndCheckoutStore( (state) => state );
-
-  // const { openOrders } = useCustomerOrdersStore((state) => state);
 
   useEffect(() => {
 
@@ -95,10 +99,20 @@ export function CustomerNavbar () {
     if (!isSignedIn) {
       clearWishlist();
       clearProfile();
+      clearOrders();
       return;
     }
     void loadWishlist();
-  }, [clearWishlist, isBootstrapped, isLoaded, isSignedIn, loadWishlist, loadCart, clearProfile])
+  }, [
+    clearWishlist,
+    clearProfile,
+    clearOrders,
+    isBootstrapped,
+    isLoaded,
+    isSignedIn,
+    loadWishlist,
+    loadCart,
+  ])
 
   const wishlistCount = wishlistItems.length;
 
@@ -154,14 +168,16 @@ export function CustomerNavbar () {
               className={accountDropdownContent}
               >
                 <DropdownMenuItem
-                  render={<Link to="/profile" className={dropdownItemLink} />}
+                  onClick={() => void openProfile()}
+                  className={dropdownItemLink}
                 >
                   <User className="h-4 w-4"/>
                   <span>My Account</span>
                 </DropdownMenuItem>
 
                 <DropdownMenuItem
-                  render={<Link to="/account" className={dropdownItemLink} />}
+                  onClick={() => void openOrders()}
+                  className={dropdownItemLink}
                 >
                     <ShoppingBasket className="h-4 w-4"/>
                     <span> My Orders </span>
@@ -203,6 +219,8 @@ export function CustomerNavbar () {
           onSignOut={signOut}
           onCartOpen={() => setOpen(true)}
           cartCount={cart?.totalQuantity ?? 0}
+          onProfileOpen={openProfile}
+          onOrdersOpen={openOrders}
         />
 
       </div>

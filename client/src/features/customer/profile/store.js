@@ -41,8 +41,10 @@ export const useCustomerProfileStore = create((set, get) => ({
     try {
       const response = await getCustomerAddresses();
       set({ items: response?.items ?? [] });
-    } catch {
-      set({ items: [] });
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to load addresses",
+      );
     }
   },
 
@@ -146,4 +148,3 @@ export const useCustomerProfileStore = create((set, get) => ({
     });
   },
 }));
-

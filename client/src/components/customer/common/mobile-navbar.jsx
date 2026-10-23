@@ -13,11 +13,13 @@ import {
   LogOut,
   Menu,
   ShoppingBag,
+  ShoppingBasket,
   ShoppingCart,
   Store,
   User,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useState } from "react";
 
 const collectionsPage = {
   label: "Collections",
@@ -98,12 +100,37 @@ export function CustomerMobileNavbar({
   onSignOut,
   onCartOpen,
   cartCount,
+  onProfileOpen,
+  onOrdersOpen,
 }) {
+  const [isMenuOpen, setMenuOpen] = useState(false);
   const mobileAccountItems = isSignedIn
     ? [
-        { label: "Account", href: "/profile", icon: User },
+        {
+          label: "My Account",
+          icon: User,
+          onClick: () => {
+            onProfileOpen();
+            setMenuOpen(false);
+          },
+        },
+        {
+          label: "My Orders",
+          icon: ShoppingBasket,
+          onClick: () => {
+            onOrdersOpen();
+            setMenuOpen(false);
+          },
+        },
         { label: "Wishlist", href: "/wishlist", icon: Heart },
-        { label: "Sign Out", icon: LogOut, onClick: onSignOut },
+        {
+          label: "Sign Out",
+          icon: LogOut,
+          onClick: () => {
+            onSignOut();
+            setMenuOpen(false);
+          },
+        },
       ]
     : [
         {
@@ -125,7 +152,7 @@ export function CustomerMobileNavbar({
         <span className={cartBadge}>{cartCount}</span>
       </button>
 
-      <Sheet>
+      <Sheet open={isMenuOpen} onOpenChange={setMenuOpen}>
         <SheetTrigger
           render={
             <Button variant="ghost" size="icon" className={menuButton} />
