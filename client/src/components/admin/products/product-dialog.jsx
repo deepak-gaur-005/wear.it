@@ -43,6 +43,7 @@ export function ProductDialog({ onOpenChange, categories, product, onSaved }) {
         addFiles, 
         submit,
         removeExistingImage,
+        removeNewFile,
         changeCoverImage,
     } = useProductform({
         onClose : () => onOpenChange(false), 
@@ -180,6 +181,7 @@ export function ProductDialog({ onOpenChange, categories, product, onSaved }) {
                     newFiles={form.newFiles}
                     coverImagePublicId={form.coverImagePublicId}
                     onFilesAdd={addFiles}
+                    onNewFileRemove={removeNewFile}
                     onExistingRemove={removeExistingImage}
                     onCoverImageChange={changeCoverImage}
                     />

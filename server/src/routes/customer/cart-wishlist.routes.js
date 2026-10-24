@@ -334,6 +334,84 @@ customerCartWishlistRouter.patch(
     })
 );
 
+customerCartWishlistRouter.patch(
+    "/cart/items/:productId/decrease",
+    asyncHandler(async (req, res) => {
+        const dbUser = await getDbUserFromReq(req);
+        const productId = String(req.params.productId || "").trim();
+        const colorValue = String(req.query.color || "").trim();
+        const sizeValue = String(req.query.size || "").trim();
+
+        requireText(
+            productId,
+            "Product id is required"
+        );
+
+        const cart = await Cart.findOne({ user: dbUser._id });
+
+        const foundCart = requireFound(
+            cart,
+            "Cart not found",
+            404
+        );
+
+        const product = await Product.findOne({
+            _id: productId,
+            status: "active",
+        });
+
+        const foundProduct = requireFound(
+            product,
+            "Product not found",
+            404
+        );
+
+        const { color, size } = getSelectedVariant(
+            foundProduct,
+            colorValue,
+            sizeValue
+        );
+
+        const itemIndex = foundCart.items.findIndex((item) =>
+            isSameCartItem(
+                item,
+                String(foundProduct._id),
+                color,
+                size
+            )
+        );
+
+        if (itemIndex < 0) {
+            throw new ApiError(
+                400,
+                "Cart item not found here"
+            );
+        }
+
+        if (foundCart.items[itemIndex].quantity <= 1) {
+            throw new ApiError(
+                400,
+                "Cart item quantity cannot be less than 1"
+            );
+        }
+
+        foundCart.items[itemIndex].quantity -= 1;
+        await foundCart.save();
+
+        const data = await getCartResponse(String(dbUser._id));
+
+        res
+            .status(200)
+            .json(
+                new ApiResponse(
+                    200,
+                    data,
+                    "Cart quantity decreased"
+                )
+            );
+    })
+);
+
 customerCartWishlistRouter.delete(
     "/cart/items/:productId",
     asyncHandler(async (req, res) => {

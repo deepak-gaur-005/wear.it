@@ -131,7 +131,7 @@ customerAddressRouter.patch(
     "/addresses/:addressId",
 
     asyncHandler(async (req, res) => {
-        const DbUser = await getDbUserFromReq(req);
+        const dbUser = await getDbUserFromReq(req);
         const addressId = String(req.params.addressId || "").trim();
 
 
@@ -158,11 +158,11 @@ customerAddressRouter.patch(
         
         const addresses = foundUser.addresses || [];
 
-        const getaddressTTheUserWantoEdit = addresses.find(
+        const addressToEdit = addresses.find(
             (currentAddress) => String(currentAddress._id) === addressId
         );
 
-        if (!getaddressTTheUserWantoEdit) {
+        if (!addressToEdit) {
             throw new ApiError(
                 404,
                 "Address not found"
@@ -185,7 +185,7 @@ customerAddressRouter.patch(
         addressToEdit.postalCode = postalCode;
 
         if (shouldMarkAsDefault) {
-            getaddressTTheUserWantoEdit.isDefault = true;
+            addressToEdit.isDefault = true;
         }
 
         await foundUser.save();
@@ -194,7 +194,7 @@ customerAddressRouter.patch(
         .sort((a, b) => Number(b.isDefault) - Number(a.isDefault))
         .map(mapAddress);
 
-        rres
+        res
             .status(200)
             .json(
                 new ApiResponse(

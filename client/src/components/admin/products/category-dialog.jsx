@@ -2,9 +2,14 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { createAdminCategory, updateAdminCategory } from "@/features/admin/products/api";
-import { Pencil, Tag } from "lucide-react";
+import {
+    createAdminCategory,
+    deleteAdminCategory,
+    updateAdminCategory,
+} from "@/features/admin/products/api";
+import { Pencil, Tag, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 
 
@@ -32,7 +37,8 @@ export function CategoryDialog({
 }){
     const [name, setName] = useState("");
     const [editingCategory, setEditingCategory] = useState(null);
-    const [saving, setSaving] = useState(false)
+    const [saving, setSaving] = useState(false);
+    const [deletingCategoryId, setDeletingCategoryId] = useState("");
 
     async function handleSave() {
         if(!name.trim()) return;
@@ -50,7 +56,12 @@ export function CategoryDialog({
             setName("");
             setEditingCategory(null);
             await onSaved();
-        }finally{
+            toast.success(editingCategory ? "Category updated" : "Category created");
+        } catch (error) {
+            toast.error(
+                error instanceof Error ? error.message : "Failed to save category"
+            );
+        } finally {
             setSaving(false);
         }
     }
@@ -58,6 +69,27 @@ export function CategoryDialog({
     function handleEdit(getCurrentCategory){
         setEditingCategory(getCurrentCategory)
         setName(getCurrentCategory.name)
+    }
+
+    async function handleDelete(category) {
+        if (!window.confirm(`Delete the "${category.name}" category?`)) return;
+
+        try {
+            setDeletingCategoryId(category._id);
+            await deleteAdminCategory(category._id);
+            if (editingCategory?._id === category._id) {
+                setEditingCategory(null);
+                setName("");
+            }
+            await onSaved();
+            toast.success("Category deleted");
+        } catch (error) {
+            toast.error(
+                error instanceof Error ? error.message : "Failed to delete category"
+            );
+        } finally {
+            setDeletingCategoryId("");
+        }
     }
 
     function handleClose(nextOpen){
@@ -93,19 +125,34 @@ export function CategoryDialog({
                     <div className={categoriesList}>
                         {categories.map((cat) => (
                             <div key={cat._id} className={categoryRow}>
-                                <div key={cat._id} className={categoryRow}>
+                                <div className="flex items-center gap-2">
                                     <Tag className={categoryIcon}/>
                                     <span className={categoryName}>{cat.name}</span>
                                 </div>
 
-                                <Button
-                                type="button"
-                                size="icon"
-                                variant='ghost'
-                                onClick={() => handleEdit(cat)}
-                                >
-                                    <Pencil className={editButtonClass}/>
-                                </Button>
+                                <div className="flex items-center">
+                                    <Button
+                                        type="button"
+                                        size="icon"
+                                        variant="ghost"
+                                        onClick={() => handleEdit(cat)}
+                                        disabled={Boolean(deletingCategoryId)}
+                                        aria-label={`Edit category ${cat.name}`}
+                                    >
+                                        <Pencil className={editButtonClass}/>
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        size="icon"
+                                        variant="ghost"
+                                        onClick={() => void handleDelete(cat)}
+                                        disabled={Boolean(deletingCategoryId)}
+                                        aria-label={`Delete category ${cat.name}`}
+                                        className="text-destructive hover:text-destructive"
+                                    >
+                                        <Trash2 className={editButtonClass}/>
+                                    </Button>
+                                </div>
                             </div>
                         ))}
                     </div>

@@ -81,6 +81,48 @@ adminProductRouter.put(
     })
 )
 
+adminProductRouter.delete(
+    "/categories/:id",
+    asyncHandler(async (req, res) => {
+        const categoryId = req.params.id;
+        const existingCategory = await Category.findById(categoryId);
+        const category = requireFound(
+            existingCategory,
+            "Category not found",
+            404
+        );
+
+        const productCount = await Product.countDocuments({
+            category: category._id,
+        });
+
+        if (productCount > 0) {
+            throw new ApiError(
+                409,
+                `Cannot delete this category because ${productCount} product${productCount === 1 ? " is" : "s are"} assigned to it.`
+            );
+        }
+
+        const deleteResult = await Category.deleteOne({
+            _id: category._id,
+        });
+
+        if (deleteResult.deletedCount !== 1) {
+            throw new ApiError(
+                404,
+                "Category not found"
+            );
+        }
+
+        res.status(200).json(
+            ok(
+                { categoryId: String(category._id) },
+                "Category deleted successfully"
+            )
+        );
+    })
+);
+
 // Products
 
 adminProductRouter.get(

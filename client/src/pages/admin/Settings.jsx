@@ -39,6 +39,8 @@ function AdminSettings() {
     refreshBanners,
     handleUpload,
     uploading,
+    removeBanner,
+    deletingBannerId,
   } = useAdminSettings();
 
   return (
@@ -113,7 +115,11 @@ function AdminSettings() {
                   No banners uploaded yet!
                 </div>
               ) : (
-                <AdminSettingsBannersTable items={items} />
+                <AdminSettingsBannersTable
+                  items={items}
+                  onDelete={removeBanner}
+                  deletingBannerId={deletingBannerId}
+                />
               )}
             </CardContent>
           </Card>

@@ -1,6 +1,10 @@
 import { useState } from "react"
 import { createAdminProduct, updateAdminProduct } from "./api"
-
+import {
+    MAX_PRODUCT_IMAGES,
+    addProductImages,
+    removeProductImage,
+} from "./image-files";
 
 function getEmptyForm(){
 
@@ -100,10 +104,32 @@ export function useProductform({
     function addFiles(files){
         if(!files?.length) return;
 
+        const selectedFiles = Array.from(files);
+        const selection = addProductImages(
+            form.newFiles,
+            selectedFiles
+        );
+
+        if (selection.exceededLimit) {
+            setError(`You can select up to ${MAX_PRODUCT_IMAGES} images.`);
+        } else {
+            setError("");
+        }
+
+        if (selection.files.length === form.newFiles.length) return;
+
         setForm((prev) => ({
             ...prev,
-            newFiles: [...prev.newFiles, ...Array.from(files)],
+            newFiles: selection.files,
         }))
+    }
+
+    function removeNewFile(fileIndex) {
+        setError("");
+        setForm((prev) => ({
+            ...prev,
+            newFiles: removeProductImage(prev.newFiles, fileIndex),
+        }));
     }
 
     function updateField(key, value) {
@@ -209,6 +235,7 @@ export function useProductform({
             submit,
             updateField,
             removeExistingImage,
+            removeNewFile,
             changeCoverImage
 
         }

@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiPut } from "@/lib/api"
+import { apiDelete, apiGet, apiPost, apiPut } from "@/lib/api"
 
 /*category api */
 
@@ -14,6 +14,10 @@ export async function updateAdminCategory(categoryId, body){
 
     return apiPut(`/admin/categories/${categoryId}`, body)
 } // categoryId tells the backend WHICH category to update
+
+export async function deleteAdminCategory(categoryId) {
+    return apiDelete(`/admin/categories/${categoryId}`)
+}
 
 /* products */
 

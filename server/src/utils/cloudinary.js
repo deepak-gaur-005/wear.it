@@ -43,5 +43,5 @@ export async function uploadManyBuffersToCloudinary(
     )
 }
 export async function deleteFromCloudinary(publicId) {
-    return await Cloudinary.uploader.destroy(publicId)
+    return await cloudinary.uploader.destroy(publicId)
 }

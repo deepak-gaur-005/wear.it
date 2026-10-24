@@ -5,7 +5,11 @@ import { getDbUserFromReq, requireAdmin } from "../../middlewares/auth.middlewar
 import { asyncHandler } from "../../utils/AsyncHandler.js";
 import { ApiResponse } from "../../utils/ApiResponse.js";
 import { ApiError } from "../../utils/ApiError.js";
-import { uploadManyBuffersToCloudinary } from "../../utils/cloudinary.js";
+import {
+    deleteFromCloudinary,
+    uploadManyBuffersToCloudinary,
+} from "../../utils/cloudinary.js";
+import mongoose from "mongoose";
 
 function mapBanner(item) {
     return {
@@ -86,6 +90,60 @@ adminSettingsRouter.post(
                     items: createdBanners.map(mapBanner),
                 },
                 "Banners uploaded successfully"
+            )
+        );
+    })
+);
+
+adminSettingsRouter.delete(
+    "/settings/banners/:bannerId",
+    asyncHandler(async (req, res) => {
+        const bannerId = String(req.params.bannerId || "").trim();
+
+        if (!mongoose.Types.ObjectId.isValid(bannerId)) {
+            throw new ApiError(
+                400,
+                "Banner id is invalid"
+            );
+        }
+
+        const banner = await Banner.findById(bannerId);
+
+        if (!banner) {
+            throw new ApiError(
+                404,
+                "Banner not found"
+            );
+        }
+
+        const cloudinaryResult = await deleteFromCloudinary(
+            banner.imagePublicId
+        );
+
+        if (
+            cloudinaryResult.result !== "ok" &&
+            cloudinaryResult.result !== "not found"
+        ) {
+            throw new ApiError(
+                502,
+                "Failed to delete banner image from Cloudinary"
+            );
+        }
+
+        const deleteResult = await Banner.deleteOne({ _id: banner._id });
+
+        if (deleteResult.deletedCount !== 1) {
+            throw new ApiError(
+                404,
+                "Banner not found"
+            );
+        }
+
+        res.status(200).json(
+            new ApiResponse(
+                200,
+                { bannerId: String(banner._id) },
+                "Banner deleted successfully"
             )
         );
     })

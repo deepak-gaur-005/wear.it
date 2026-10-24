@@ -1,11 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
-import { getAdminBanners, uploadAdminBanners } from "./api";
+import { toast } from "sonner";
+import {
+  deleteAdminBanner,
+  getAdminBanners,
+  uploadAdminBanners,
+} from "./api";
 
 export function useAdminSettings() {
   const [items, setItems] = useState([]);
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [deletingBannerId, setDeletingBannerId] = useState("");
 
   async function refreshBanners() {
     try {
@@ -45,6 +51,24 @@ export function useAdminSettings() {
     }
   }
 
+  async function removeBanner(bannerId) {
+    try {
+      setDeletingBannerId(bannerId);
+
+      await deleteAdminBanner(bannerId);
+      setItems((currentItems) =>
+        currentItems.filter((item) => item._id !== bannerId),
+      );
+      toast.success("Banner deleted successfully");
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to delete banner",
+      );
+    } finally {
+      setDeletingBannerId("");
+    }
+  }
+
   const fileCountLabel = useMemo(() => {
     if (!files.length) return "No files selected";
 
@@ -65,5 +89,7 @@ export function useAdminSettings() {
     refreshBanners,
     handleUpload,
     uploading,
+    removeBanner,
+    deletingBannerId,
   };
 }

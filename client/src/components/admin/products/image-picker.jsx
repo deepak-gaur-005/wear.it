@@ -1,8 +1,9 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@base-ui/react";
+import { Button } from "@/components/ui/button";
+import { MAX_PRODUCT_IMAGES } from "@/features/admin/products/image-files";
 import { ImagePlus, Star, X } from "lucide-react";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 const wrapperClass = "space-y-4";
 
@@ -28,6 +29,9 @@ const gridClass = "grid grid-cols-2 gap-3 md:grid-cols-4";
 const imageCardClass =
   "overflow-hidden rounded-xl border border-border bg-card";
 
+const newImageCardClass =
+  "relative overflow-hidden rounded-xl border border-border bg-card";
+
 const imageClass = "h-28 w-full object-cover";
 
 const imageActionsClass = "flex items-center justify-between gap-2 p-2";
@@ -43,13 +47,23 @@ export function ImagePicker({
     newFiles = [],
     covderImagePublicId,
     onFilesAdd,
+    onNewFileRemove,
     onExistingRemove,
     onCoverImageChange,
 }) {
+    const fileInputRef = useRef(null);
     const previewUrls = useMemo(
         () => (newFiles ?? []).map((file) => ({ file, url: URL.createObjectURL(file) })),
         [newFiles]
     )
+
+    useEffect(() => {
+        if (!fileInputRef.current) return;
+
+        const transfer = new DataTransfer();
+        newFiles.forEach((file) => transfer.items.add(file));
+        fileInputRef.current.files = transfer.files;
+    }, [newFiles]);
 
     useEffect(() => {
         return () => {
@@ -59,8 +73,6 @@ export function ImagePicker({
         }
     }, [previewUrls])
  
-    console.log(previewUrls, 'previewUrlspreviewUrls')
-
     return (
         <div className={wrapperClass}>
             <div className={headerClass}>
@@ -69,13 +81,24 @@ export function ImagePicker({
             <Label className={uploadLabelClass}>
                 <ImagePlus className={uploadIconClass}/>
                 <span className={uploadTitleClass}>Upload Product Images</span>
+                <span className="text-xs text-muted-foreground">
+                    {newFiles.length} of {MAX_PRODUCT_IMAGES} new images selected
+                </span>
                 
                 <Input
                     type="file"
                     accept="image/*"
                     multiple
+                    ref={fileInputRef}
                     className={hiddenInputClass}
-                    onChange={(event) => onFilesAdd(event.target.files)}
+                    disabled={newFiles.length >= MAX_PRODUCT_IMAGES}
+                    onClick={(event) => {
+                        event.currentTarget.value = "";
+                    }}
+                    onChange={(event) => {
+                        onFilesAdd(event.target.files);
+                        event.target.value = "";
+                    }}
                 />
             </Label>
 
@@ -129,13 +152,23 @@ export function ImagePicker({
                         {
                             previewUrls.map((previewItem, index) => (
                                 <div key={`${previewItem.file.name}-${index}`}
-                                className={imageCardClass}
+                                className={newImageCardClass}
                                 >
                                     <img
                                     src={previewItem.url}
                                     alt={previewItem.file.name}
                                     className={imageClass}
                                     />
+                                    <Button
+                                        type="button"
+                                        size="icon-xs"
+                                        variant="destructive"
+                                        className="absolute right-2 top-2 rounded-full"
+                                        onClick={() => onNewFileRemove(index)}
+                                        aria-label={`Remove ${previewItem.file.name}`}
+                                    >
+                                        <X className={removeIconClass}/>
+                                    </Button>
                                     < div className={fileNameClass}> {previewItem.file.name} </div>
                                 </div>
                             ))
