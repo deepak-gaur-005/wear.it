@@ -106,6 +106,13 @@ const OrderSchema = new mongoose.Schema(
 );
 
 OrderSchema.index({ user: 1, createdAt: -1 });
+OrderSchema.index({
+  user: 1,
+  "items.product": 1,
+  paymentStatus: 1,
+  orderStatus: 1,
+  deliveredAt: 1,
+});
 OrderSchema.index({ orderStatus: 1, createdAt: -1 });
 OrderSchema.index({ paymentStatus: 1, createdAt: -1 });
 

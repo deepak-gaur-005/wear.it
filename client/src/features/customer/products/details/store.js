@@ -2,16 +2,13 @@ import { create } from "zustand";
 import { getCustomerProductDetails } from "../api";
 import { getCoverImage } from "../product-list-shared";
 import { toast } from "sonner";
-import {
-  addCustomerWishlist,
-  removeCustomerWishlistItem,
-} from "../../wishlist/api";
 import { useCustomerWishlistStore } from "../../wishlist/store";
 import { useCustomerCartAndCheckoutStore } from "../../cart-and-ckeckout/store";
 
 const defaultState = {
   loading: true,
   data: null,
+  error: "",
   selectedImage: "",
   selectedColor: "",
   selectedSize: "",
@@ -25,6 +22,7 @@ export const useCustomerProductDetailsStore = create((set, get) => ({
       set({
         loading: false,
         data: null,
+        error: "Product not found.",
         selectedImage: "",
         selectedColor: "",
         selectedSize: "",
@@ -35,6 +33,7 @@ export const useCustomerProductDetailsStore = create((set, get) => ({
     set({
       loading: true,
       data: null,
+      error: "",
       selectedImage: "",
       selectedColor: "",
       selectedSize: "",
@@ -47,14 +46,17 @@ export const useCustomerProductDetailsStore = create((set, get) => ({
       set({
         loading: false,
         data: response ?? null,
+        error: "",
         selectedImage: product ? getCoverImage(product) : "",
         selectedColor: product?.colors?.[0] || "",
         selectedSize: product?.sizes?.[0] || "",
       });
-    } catch {
+    } catch (error) {
       set({
         loading: false,
         data: null,
+        error:
+          error instanceof Error ? error.message : "Failed to load product.",
         selectedImage: "",
         selectedColor: "",
         selectedSize: "",
@@ -74,41 +76,14 @@ export const useCustomerProductDetailsStore = create((set, get) => ({
     isLoaded,
     isBootstrapped,
     isSignedIn,
-    isWishlistActive,
   ) => {
     const product = get().data?.product ?? null;
 
     if (!product) return;
 
-    if (!isLoaded || !isBootstrapped || !isSignedIn) {
-      toast.error("Sign in to save");
-      return;
-    }
-
-    try {
-      if (isWishlistActive) {
-        const response = await removeCustomerWishlistItem(product._id);
-
-        useCustomerWishlistStore
-          .getState()
-          .setItems(response?.items ?? []);
-
-        toast.success("Removed");
-        return;
-      }
-
-      const response = await addCustomerWishlist({
-        productId: product._id,
-      });
-
-      useCustomerWishlistStore
-        .getState()
-        .setItems(response?.items ?? []);
-
-      toast.success("Saved");
-    } catch {
-      toast.error("Failed to toggle wishlist items");
-    }
+    await useCustomerWishlistStore
+      .getState()
+      .toggleItem(product._id, isLoaded, isBootstrapped, isSignedIn);
   },
 
   addToCart: async (isLoaded, isBootstrapped, isSignedIn) => {

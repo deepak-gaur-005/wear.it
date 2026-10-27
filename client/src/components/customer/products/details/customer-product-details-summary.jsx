@@ -6,7 +6,7 @@ import { formatPrice } from "@/lib/utils";
 import { Heart, ShoppingBag } from "lucide-react";
 import CustomerProductOptionsGroup from "./customer-product-options-group";
 
-const summaryWrapClass = "space-y-6";
+const summaryWrapClass = "space-y-7 lg:pt-2";
 
 const badgesWrapClass = "flex flex-wrap items-center gap-2";
 
@@ -16,30 +16,26 @@ const categoryBadgeClass =
 const stockBadgeClass =
   "border-primary/30 bg-primary/15 text-primary hover:bg-primary/15";
 
-const metaGridClass = "grid gap-3 text-sm sm:grid-cols-2";
-
-const metaItemClass = "space-y-1";
-
-const metaLabelClass = "block text-muted-foreground";
-
-const metaValueClass = "block font-medium text-foreground";
-
-const priceBlockClass = "space-y-3";
+const priceBlockClass = "space-y-4";
 
 const priceRowClass = "flex flex-wrap items-center gap-3";
 
-const salePriceClass = "text-3xl font-semibold text-foreground";
+const salePriceClass = "text-4xl font-semibold tracking-tight text-foreground";
 
 const originalPriceClass = "text-lg text-muted-foreground line-through";
 
+const savingsClass = "text-sm font-medium text-primary";
+
 const descriptionClass =
-  "whitespace-pre-line text-sm leading-7 text-muted-foreground";
+  "whitespace-pre-line text-sm leading-7 text-muted-foreground sm:text-base";
+
+const optionsClass = "space-y-6";
 
 const actionButtonsClass = "flex flex-col gap-3 sm:flex-row";
 
-const primaryButtonClass = "rounded-none sm:flex-1";
+const primaryButtonClass = "min-h-12 rounded-none sm:flex-1";
 
-const secondaryButtonClass = "rounded-none sm:flex-1";
+const secondaryButtonClass = "min-h-12 rounded-none sm:flex-1";
 
 const iconClass = "mr-2 h-4 w-4";
 
@@ -59,9 +55,11 @@ function CustomerProductDetailsSummary({
   return (
     <section className={summaryWrapClass}>
       <div className={badgesWrapClass}>
-        <Badge className={categoryBadgeClass}>
-          {product?.category?.name}
-        </Badge>
+        {product?.category?.name ? (
+          <Badge className={categoryBadgeClass}>
+            {product.category.name}
+          </Badge>
+        ) : null}
 
         {product?.stock > 0 ? (
           <Badge className={stockBadgeClass}>
@@ -78,20 +76,6 @@ function CustomerProductDetailsSummary({
         ) : null}
       </div>
 
-      <div className={metaGridClass}>
-        <p className={metaItemClass}>
-          <span className={metaLabelClass}>Brand</span>
-          <span className={metaValueClass}>{product?.brand}</span>
-        </p>
-
-        <p className={metaItemClass}>
-          <span className={metaLabelClass}>Category</span>
-          <span className={metaValueClass}>
-            {product?.category?.name}
-          </span>
-        </p>
-      </div>
-
       <div className={priceBlockClass}>
         <div className={priceRowClass}>
           <span className={salePriceClass}>{formatPrice(salePrice)}</span>
@@ -101,6 +85,11 @@ function CustomerProductDetailsSummary({
               {formatPrice(product.price)}
             </span>
           ) : null}
+          {hasSale ? (
+            <span className={savingsClass}>
+              Save {formatPrice(product.price - salePrice)}
+            </span>
+          ) : null}
         </div>
 
         {product.description ? (
@@ -108,22 +97,28 @@ function CustomerProductDetailsSummary({
         ) : null}
       </div>
 
-      {product.colors.length ? (
-        <CustomerProductOptionsGroup
-          values={product.colors}
-          selectedValue={selectedColor}
-          onSelect={setSelectedColor}
-          variant="color"
-        />
-      ) : null}
+      {product.colors?.length || product.sizes?.length ? (
+        <div className={optionsClass}>
+          {product.colors?.length ? (
+            <CustomerProductOptionsGroup
+              label="Color"
+              values={product.colors}
+              selectedValue={selectedColor}
+              onSelect={setSelectedColor}
+              variant="color"
+            />
+          ) : null}
 
-      {product.colors.length ? (
-        <CustomerProductOptionsGroup
-          values={product.sizes}
-          selectedValue={selectedSize}
-          onSelect={setSelectedSize}
-          variant="size"
-        />
+          {product.sizes?.length ? (
+            <CustomerProductOptionsGroup
+              label="Size"
+              values={product.sizes}
+              selectedValue={selectedSize}
+              onSelect={setSelectedSize}
+              variant="size"
+            />
+          ) : null}
+        </div>
       ) : null}
 
       <Separator />

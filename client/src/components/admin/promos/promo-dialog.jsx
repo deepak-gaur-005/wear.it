@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -29,6 +29,19 @@ const defaultForm = {
   endsAt: "",
 };
 
+function getInitialForm(promo) {
+  if (!promo) return { ...defaultForm };
+
+  return {
+    code: promo.code,
+    percentage: String(promo.percentage),
+    count: String(promo.count),
+    minimumOrderValue: String(promo.minimumOrderValue),
+    startsAt: toDateTimeLocal(promo.startsAt),
+    endsAt: toDateTimeLocal(promo.endsAt),
+  };
+}
+
 function toDateTimeLocal(value) {
   if (!value) return "";
 
@@ -43,32 +56,10 @@ function toDateTimeLocal(value) {
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
 
-function PromoDialog({open, onOpenChange, promo, saving, onSaved }) {
-  const [form, setForm] = useState(defaultForm);
+function PromoDialog({ onOpenChange, promo, saving, onSaved }) {
+  const [form, setForm] = useState(() => getInitialForm(promo));
 
   const isEditMode = !!promo;
-
-  useEffect(() => {
-    if (!open) {
-      setForm({ ...defaultForm });
-      return;
-    }
-
-    if (promo) {
-      setForm({
-        code: promo.code,
-        percentage: String(promo.percentage),
-        count: String(promo.count),
-        minimumOrderValue: String(promo.minimumOrderValue),
-        startsAt: toDateTimeLocal(promo.startsAt),
-        endsAt: toDateTimeLocal(promo.endsAt),
-      });
-
-      return;
-    }
-
-    setForm({ ...defaultForm });
-  }, [open, promo]);
 
   function updateField(key, value) {
     setForm((current) => ({
@@ -104,7 +95,7 @@ function PromoDialog({open, onOpenChange, promo, saving, onSaved }) {
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open onOpenChange={onOpenChange}>
       <DialogContent className={dialogContentClass}>
         <DialogHeader>
           <DialogTitle>

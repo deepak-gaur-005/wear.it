@@ -1,4 +1,4 @@
-import { BadgePercent, BarChart3, LayoutDashboard, Package, Settings2, Store } from "lucide-react";
+import { BadgePercent, BarChart3, LayoutDashboard, MessageSquareText, Package, Settings2, Store } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 const items = [
@@ -6,6 +6,7 @@ const items = [
   { label: "Products", href: "/admin/products", icon: Package },
   { label: "Coupons", href: "/admin/coupons", icon: BadgePercent },
   { label: "Orders", href: "/admin/orders", icon: BarChart3 },
+  { label: "Reviews", href: "/admin/reviews", icon: MessageSquareText },
   { label: "Settings", href: "/admin/settings", icon: Settings2 },
 ];
 

@@ -23,6 +23,8 @@ import { customerHomeRouter } from "./routes/customer/home.routes.js";
 import { adminDashboardRouter } from "./routes/admin/dashboard.routes.js";
 import { adminOrderRouter } from "./routes/admin/order.routes.js";
 import { adminSettingsRouter } from "./routes/admin/settings.routes.js";
+import { customerReviewRouter } from "./routes/customer/review.routes.js";
+import { adminReviewRouter } from "./routes/admin/review.routes.js";
 
 
 const app = express();
@@ -76,6 +78,7 @@ app.use("/customer", customerCheckoutRouter);
 app.use("/customer", customerOrderRouter);
 app.use("/customer", customerCheckoutWithPointsRouter);
 app.use("/customer", customerHomeRouter);
+app.use("/customer", customerReviewRouter);
 
 //admin routes
 app.use("/admin", adminProductRouter)
@@ -83,6 +86,7 @@ app.use("/admin", adminPromoRouter)
 app.use("/admin", adminDashboardRouter)
 app.use("/admin", adminOrderRouter)
 app.use("/admin", adminSettingsRouter)
+app.use("/admin", adminReviewRouter)
 
 //404 handler'
 app.use(notFound);

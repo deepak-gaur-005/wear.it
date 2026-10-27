@@ -1,5 +1,9 @@
 import { getSwatchColor } from "@/features/customer/products/product-list-shared";
 
+const groupClass = "space-y-3";
+
+const labelClass = "block text-sm font-medium text-foreground";
+
 const wrapClass = "flex flex-wrap gap-2";
 
 const baseButtonClass =
@@ -20,34 +24,44 @@ const swatchClass = "h-4 w-4 border border-border";
 function CustomerProductOptionsGroup({
   values,
   variant,
+  label,
   selectedValue,
   onSelect,
 }) {
   return (
-    <div role="group" className={wrapClass}>
-      {values.map((value) => {
-        const isActive = selectedValue === value;
+    <div className={groupClass}>
+      <span className={labelClass}>{label}</span>
+      <div role="group" aria-label={label} className={wrapClass}>
+        {values.map((value) => {
+          const isActive = selectedValue === value;
 
-        return (
-          <button
-            key={value}
-            type="button"
-            onClick={() => onSelect(value)}
-            className={`${baseButtonClass} ${
-              variant === "color" ? colorButtonClass : sizeButtonClass
-            } ${isActive ? activeButtonClass : inactiveButtonClass}`}
-          >
-            {variant === "color" ? (
-              <span
-                className={swatchClass}
-                style={{ backgroundColor: getSwatchColor(value) }}
-              />
-            ) : (
-              value
-            )}
-          </button>
-        );
-      })}
+          return (
+            <button
+              key={value}
+              type="button"
+              aria-label={variant === "color" ? `Color ${value}` : value}
+              aria-pressed={isActive}
+              onClick={() => onSelect(value)}
+              className={`${baseButtonClass} ${
+                variant === "color" ? colorButtonClass : sizeButtonClass
+              } ${isActive ? activeButtonClass : inactiveButtonClass}`}
+            >
+              {variant === "color" ? (
+                <>
+                  <span
+                    aria-hidden="true"
+                    className={swatchClass}
+                    style={{ backgroundColor: getSwatchColor(value) }}
+                  />
+                  <span>{value}</span>
+                </>
+              ) : (
+                value
+              )}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }

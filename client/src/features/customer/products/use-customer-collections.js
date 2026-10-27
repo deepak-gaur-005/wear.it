@@ -8,7 +8,7 @@ export function useCustomerProductList() {
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [availableColors, setAvailableColors] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loadedQuery, setLoadedQuery] = useState(null);
 
   const filters = useMemo(
     () => ({
@@ -37,33 +37,9 @@ export function useCustomerProductList() {
     filters.category || filters.brand || filters.color || filters.size,
   );
 
-  async function loadCategories() {
-    try {
-      const data = await getCustomerCategories();
-      setCategories(data ?? []);
-    } catch (error) {
-      console.error("Failed to load categories:", error);
-      setCategories([]);
-    }
-  }
-
-  async function loadProducts(params) {
-    setLoading(true);
-
-    try {
-      const data = await getCustomerProducts(params);
-      setProducts(data ?? []);
-    } catch (error) {
-      console.error("Failed to load products:", error);
-      setProducts([]);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  function updateParams(nextParams) {
+  const updateParams = useCallback((nextParams) => {
     setSearchParams(nextParams);
-  }
+  }, [setSearchParams]);
 
   const toggleFacet = (key, value) => {
     const nextParams = new URLSearchParams(searchParams);
@@ -90,7 +66,7 @@ export function useCustomerProductList() {
 
       updateParams(nextParams);
     },
-    [searchParams, setSearchParams],
+    [searchParams, updateParams],
   );
 
   const clearFilters = () => {
@@ -105,24 +81,6 @@ export function useCustomerProductList() {
   };
 
   // available colors
-  async function loadAvailableColors() {
-    try {
-      const data = await getCustomerProducts();
-      const uniqueColors = new Set();
-
-      (data ?? []).forEach((item) => {
-        (item.colors ?? []).forEach((color) => uniqueColors.add(color));
-      });
-
-      setAvailableColors(
-        Array.from(uniqueColors).sort((a, b) => a.localeCompare(b)),
-      );
-    } catch (error) {
-      console.error("Failed to load available colors:", error);
-      setAvailableColors([]);
-    }
-  }
-
   // active filter badges
   const activeFilterBadges = useMemo(() => {
     const items = [];
@@ -167,21 +125,76 @@ export function useCustomerProductList() {
   }, [categories, filters]);
 
   useEffect(() => {
-    void loadCategories();
+    let active = true;
+
+    getCustomerCategories()
+      .then((data) => {
+        if (active) setCategories(data ?? []);
+      })
+      .catch((error) => {
+        console.error("Failed to load categories:", error);
+        if (active) setCategories([]);
+      });
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   useEffect(() => {
-    void loadProducts(query);
+    let active = true;
+
+    getCustomerProducts(query)
+      .then((data) => {
+        if (active) {
+          setProducts(data ?? []);
+          setLoadedQuery(query);
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to load products:", error);
+        if (active) {
+          setProducts([]);
+          setLoadedQuery(query);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
   }, [query]);
 
   useEffect(() => {
-    void loadAvailableColors();
+    let active = true;
+
+    getCustomerProducts()
+      .then((data) => {
+        const uniqueColors = new Set();
+
+        (data ?? []).forEach((item) => {
+          (item.colors ?? []).forEach((color) => uniqueColors.add(color));
+        });
+
+        if (active) {
+          setAvailableColors(
+            Array.from(uniqueColors).sort((a, b) => a.localeCompare(b)),
+          );
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to load available colors:", error);
+        if (active) setAvailableColors([]);
+      });
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   return {
     categories,
     products,
-    loading,
+    loading: loadedQuery !== query,
     filters,
     sort,
     hasActiveFilters,

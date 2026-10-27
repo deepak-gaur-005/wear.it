@@ -54,20 +54,22 @@ function AdminPromos() {
         </CardContent>
       </Card>
 
-      <PromoDialog
-        open={promoDialogOpen}
-        onOpenChange={(open) => {
-          if (!open) {
-            closePromoDialog();
-            return;
-          }
+      {promoDialogOpen ? (
+        <PromoDialog
+          key={editingPromo?._id ?? "new"}
+          onOpenChange={(open) => {
+            if (!open) {
+              closePromoDialog();
+              return;
+            }
 
-          setPromoDialogOpen(true);
-        }}
-        promo={editingPromo}
-        saving={saving}
-        onSaved={savePromo}
-      />
+            setPromoDialogOpen(true);
+          }}
+          promo={editingPromo}
+          saving={saving}
+          onSaved={savePromo}
+        />
+      ) : null}
     </div>
   );
 }
