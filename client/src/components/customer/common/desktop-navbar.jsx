@@ -1,12 +1,12 @@
 import { useAuth } from "@clerk/react";
-import { ShoppingBag, Heart, User, LogIn, LogOut, ShoppingCart, ShoppingBasket } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ShoppingBag, Heart, User, LogIn, LogOut, ShoppingCart, ShoppingBasket, Search } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { CustomerMobileNavbar } from "./mobile-navbar";
 import { useCustomerWishlistStore } from "@/features/customer/wishlist/store";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuthStore } from "@/features/auth/store";
 import { useCustomerProfileStore } from "@/features/customer/profile/store";
 import { useCustomerOrdersStore } from "@/features/customer/orders/store";
@@ -89,6 +89,16 @@ export function CustomerNavbar () {
   );
 
   const { setOpen, cart, loadCart } = useCustomerCartAndCheckoutStore( (state) => state );
+  const [navSearch, setNavSearch] = useState("");
+  const navigate = useNavigate();
+
+  const handleNavSearch = (e) => {
+    e.preventDefault();
+    if (navSearch.trim()) {
+      navigate(`/collections?search=${encodeURIComponent(navSearch.trim())}`);
+      setNavSearch("");
+    }
+  };
 
   useEffect(() => {
 
@@ -136,6 +146,18 @@ export function CustomerNavbar () {
             icon={collectionsPage.icon}
           />
         </div>
+
+        {/* Global Search Bar */}
+        <form onSubmit={handleNavSearch} className="relative hidden md:flex items-center ml-2">
+          <Search className="absolute left-3 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+          <input
+            type="text"
+            placeholder="Search products, brands..."
+            value={navSearch}
+            onChange={(e) => setNavSearch(e.target.value)}
+            className="h-9 w-48 lg:w-64 rounded-full border border-border/80 bg-background/80 pl-8.5 pr-3 text-xs placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-all duration-200"
+          />
+        </form>
 
         {/* Desktop navigation */}
         <nav className={desktopNav}>

@@ -49,7 +49,7 @@ customerCheckoutWithPointsRouter.post(
         // Fetch the user's checkout information and cart at the same time.
         const [user, cart] = await Promise.all([
             User.findById(dbUser._id)
-                .select("name email addresses")
+                .select("name email addresses points")
                 .lean(),
             Cart.findOne({ user: dbUser._id })
                 .select("items")
@@ -78,7 +78,7 @@ customerCheckoutWithPointsRouter.post(
                 $in: foundCart.items.map((item) => item.product),
             },
         })
-            .select("price salePercentage stock status")
+            .select("price salePercentage stock status title images colors")
             .lean();
 
         const productMap = new Map(
@@ -113,9 +113,19 @@ customerCheckoutWithPointsRouter.post(
             totalItems += cartItem.quantity;
             subTotal += finalPrice * cartItem.quantity;
 
+            const coverImage =
+                product.images?.find((img) => img.isCover)?.url ||
+                product.images?.[0]?.url ||
+                "";
+
             return {
                 product: cartItem.product,
                 quantity: cartItem.quantity,
+                title: product.title || "",
+                image: coverImage,
+                unitPrice: finalPrice,
+                color: cartItem.color || "",
+                size: cartItem.size || "",
             };
         });
 
@@ -173,8 +183,9 @@ customerCheckoutWithPointsRouter.post(
             throw new ApiError(400, "Not enough points for this order");
         }
 
+        const decrementedItems = [];
         try {
-            // Reduce stock for every purchased product.
+            // Reduce stock for every purchased product with rollback safety.
             for (const item of items) {
                 const updated = await Product.updateOne(
                     {
@@ -189,9 +200,10 @@ customerCheckoutWithPointsRouter.post(
                 if (!updated.matchedCount) {
                     throw new ApiError(
                         400,
-                        "One or more cart items are out of stock"
+                        `Item "${item.title || "product"}" is out of stock`
                     );
                 }
+                decrementedItems.push(item);
             }
 
             // Consume one use of the promo code.
@@ -235,6 +247,7 @@ customerCheckoutWithPointsRouter.post(
                 promoCode: appliedPromoCode,
                 discountAmount,
                 totalAmount,
+                paymentMethod: "points",
                 paymentStatus: "paid",
                 orderStatus: "placed",
                 razorpayOrderId: pointsPaymentId,
@@ -257,6 +270,16 @@ customerCheckoutWithPointsRouter.post(
                 )
             );
         } catch (error) {
+            // Roll back any partially decremented product stock
+            for (const item of decrementedItems) {
+                await Product.updateOne(
+                    { _id: item.product },
+                    { $inc: { stock: item.quantity } }
+                ).catch((err) =>
+                    console.error("Failed to restore stock on points checkout rollback:", err)
+                );
+            }
+
             // Refund points if something fails after the deduction.
             await User.updateOne(
                 { _id: dbUser._id },

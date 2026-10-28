@@ -15,7 +15,7 @@ export const customerOrderRouter = Router();
 
 customerOrderRouter.use(requireAuth);
 
-// Gets the logged-in customer's orders and returns a simplified list for the UI.
+// Gets the logged-in customer's orders with full item snapshots and delivery details.
 customerOrderRouter.get(
     "/orders",
     asyncHandler(async (req, res) => {
@@ -25,7 +25,7 @@ customerOrderRouter.get(
             user: dbUser._id,
         })
             .select(
-                "totalItems totalAmount paymentStatus orderStatus paidAt deliveredAt returnedAt createdAt"
+                "items totalItems totalAmount discountAmount promoCode deliveryName deliveryAddress paymentStatus orderStatus paidAt deliveredAt returnedAt createdAt"
             )
             .sort({ createdAt: -1 })
             .lean();
@@ -37,12 +37,25 @@ customerOrderRouter.get(
                 .toUpperCase(),
             totalItems: orderItem.totalItems,
             totalAmount: orderItem.totalAmount,
+            discountAmount: orderItem.discountAmount || 0,
+            promoCode: orderItem.promoCode || "",
+            deliveryName: orderItem.deliveryName || "",
+            deliveryAddress: orderItem.deliveryAddress || "",
             paymentStatus: orderItem.paymentStatus,
             orderStatus: orderItem.orderStatus,
             paidAt: orderItem.paidAt,
             deliveredAt: orderItem.deliveredAt,
             returnedAt: orderItem.returnedAt,
             createdAt: orderItem.createdAt,
+            items: (orderItem.items || []).map((item) => ({
+                product: String(item.product),
+                quantity: item.quantity,
+                title: item.title || "",
+                image: item.image || "",
+                unitPrice: item.unitPrice || 0,
+                color: item.color || "",
+                size: item.size || "",
+            })),
         }));
 
         res.status(200).json(

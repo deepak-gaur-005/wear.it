@@ -173,13 +173,13 @@ customerCartWishlistRouter.post(
         const dbUser = await getDbUserFromReq(req);
 
         const productId = String(req.body.productId || "").trim();
-        const quantity = String(req.body.quantity || 1)
+        const quantity = Number(req.body.quantity ?? 1);
         const colorValue = String(req.body.color || "").trim();
         const sizeValue = String(req.body.size || "").trim();
 
         requireText(productId, "Product id is required");
 
-        if ( Number.isNaN(quantity) || quantity < 1) {
+        if (!Number.isInteger(quantity) || quantity < 1) {
             throw new ApiError(
                 400,
                 "Quantity must be at least 1"

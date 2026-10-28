@@ -31,7 +31,7 @@ export default function CustomerOrderSuccessPage() {
 
         <div className={buttonRowClass}>
           <Button asChild className={buttonClass}>
-            <Link to="/collection">Continue shopping</Link>
+            <Link to="/collections">Continue shopping</Link>
           </Button>
 
           <Button asChild variant="outline" className={buttonClass}>

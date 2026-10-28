@@ -27,19 +27,57 @@ customerProductRouter.get(
 );
 
 customerProductRouter.get(
+    "/products/facets",
+    asyncHandler(async (_req, res) => {
+        const [colors, brands] = await Promise.all([
+            Product.distinct("colors", { status: "active" }),
+            Product.distinct("brand", { status: "active" }),
+        ]);
+
+        const filteredColors = colors.filter(Boolean).sort((a, b) => a.localeCompare(b));
+        const filteredBrands = brands.filter(Boolean).sort((a, b) => a.localeCompare(b));
+
+        res.status(200).json(
+            new ApiResponse(
+                200,
+                {
+                    colors: filteredColors,
+                    brands: filteredBrands,
+                },
+                "Facets fetched successfully"
+            )
+        );
+    })
+);
+
+customerProductRouter.get(
     "/products",
     asyncHandler(async (req, res) => {
-        //filters lena url se filter nikl rhe hey
+        // Parse filter and search parameters from URL query
+        const search = (req.query.search || req.query.q || "").trim();
         const category = (req.query.category || "").trim();
         const brand = (req.query.brand || "").trim();
         const color = (req.query.color || "").trim();
         const size = (req.query.size || "").trim();
+        const minPrice = Number(req.query.minPrice);
+        const maxPrice = Number(req.query.maxPrice);
         const sort = req.query.sort || "recent";
 
         const query = {
-            status: "active", // only active product needed
+            status: "active", // only active products
+        };
+
+        // Text search across title, brand, and description
+        if (search) {
+            const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+            const regex = new RegExp(escaped, "i");
+            query.$or = [
+                { title: regex },
+                { brand: regex },
+                { description: regex },
+            ];
         }
-        // adding filters
+
         if (category) {
             query.category = category;
         }
@@ -56,32 +94,39 @@ customerProductRouter.get(
             query.sizes = size;
         }
 
+        if (!Number.isNaN(minPrice) || !Number.isNaN(maxPrice)) {
+            query.price = {};
+            if (!Number.isNaN(minPrice) && minPrice >= 0) {
+                query.price.$gte = minPrice;
+            }
+            if (!Number.isNaN(maxPrice) && maxPrice > 0) {
+                query.price.$lte = maxPrice;
+            }
+        }
+
         let sortOption = { createdAt: -1 };
 
         if (sort === "price-low") {
             sortOption = { price: 1 };
-        }
-
-        if (sort === "price-high") {
+        } else if (sort === "price-high") {
             sortOption = { price: -1 };
+        } else if (sort === "sale") {
+            sortOption = { salePercentage: -1 };
         }
 
         const products = await Product.find(query)
-            .populate("category", "name") //product ke category ObjectId ke saath category ka name bhi MongoDB se lao
-            .sort(sortOption); //sorting apply krta hey
+            .populate("category", "name")
+            .sort(sortOption);
 
-        res
-            .status(200)
-            .json(
-                new ApiResponse(
-                    200,
-                    products,
-                    "Products fetched successfully"
-                )
-            );
-
+        res.status(200).json(
+            new ApiResponse(
+                200,
+                products,
+                "Products fetched successfully"
+            )
+        );
     })
-)
+);
 
 customerProductRouter.get(
     "/products/:id",

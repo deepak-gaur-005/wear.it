@@ -19,6 +19,110 @@ import {razorpay, toSubUnits} from "../../utils/razorpay.js";
 
 export const customerCheckoutRouter = Router();
 
+// Webhook endpoint for asynchronous Razorpay payment events (server-to-server).
+// Must NOT be behind requireAuth as it is called directly by Razorpay's servers.
+customerCheckoutRouter.post(
+    "/checkout/webhook",
+    asyncHandler(async (req, res) => {
+        const webhookSecret =
+            process.env.RAZORPAY_WEBHOOK_SECRET || process.env.RAZORPAY_KEY_SECRET;
+        if (!webhookSecret) {
+            throw new ApiError(500, "Webhook secret not configured");
+        }
+
+        const razorpaySignature = req.headers["x-razorpay-signature"];
+        if (!razorpaySignature) {
+            throw new ApiError(400, "Missing x-razorpay-signature header");
+        }
+
+        const rawPayload = req.rawBody
+            ? req.rawBody.toString("utf8")
+            : JSON.stringify(req.body);
+
+        const expectedSignature = crypto
+            .createHmac("sha256", webhookSecret)
+            .update(rawPayload)
+            .digest("hex");
+
+        if (expectedSignature !== razorpaySignature) {
+            throw new ApiError(400, "Invalid webhook signature");
+        }
+
+        const event = req.body?.event;
+        const payload = req.body?.payload;
+
+        if (event === "payment.captured" || event === "order.paid") {
+            const paymentEntity = payload?.payment?.entity;
+            const orderEntity = payload?.order?.entity;
+            const razorpayOrderId = paymentEntity?.order_id || orderEntity?.id;
+            const razorpayPaymentId = paymentEntity?.id;
+
+            if (razorpayOrderId) {
+                const order = await Order.findOne({ razorpayOrderId });
+                if (order && order.paymentStatus !== "paid") {
+                    const decrementedItems = [];
+                    try {
+                        for (const item of order.items) {
+                            const updated = await Product.updateOne(
+                                {
+                                    _id: item.product,
+                                    stock: { $gte: item.quantity },
+                                },
+                                {
+                                    $inc: { stock: -item.quantity },
+                                }
+                            );
+
+                            if (updated.matchedCount) {
+                                decrementedItems.push(item);
+                            }
+                        }
+
+                        if (order.promoCode) {
+                            await Promo.updateOne(
+                                { code: order.promoCode, count: { $gt: 0 } },
+                                { $inc: { count: -1 } }
+                            );
+                        }
+
+                        await Cart.updateOne(
+                            { user: order.user },
+                            { $set: { items: [] } }
+                        );
+
+                        order.paymentStatus = "paid";
+                        order.paymentId = razorpayPaymentId || order.paymentId;
+                        order.paidAt = new Date();
+                        await order.save();
+                    } catch (err) {
+                        for (const item of decrementedItems) {
+                            await Product.updateOne(
+                                { _id: item.product },
+                                { $inc: { stock: item.quantity } }
+                            ).catch((rollErr) =>
+                                console.error("Webhook rollback error:", rollErr)
+                            );
+                        }
+                        throw err;
+                    }
+                }
+            }
+        } else if (event === "payment.failed") {
+            const paymentEntity = payload?.payment?.entity;
+            const razorpayOrderId = paymentEntity?.order_id;
+            if (razorpayOrderId) {
+                const order = await Order.findOne({ razorpayOrderId });
+                if (order && order.paymentStatus === "pending") {
+                    order.paymentStatus = "failed";
+                    await order.save();
+                }
+            }
+        }
+
+        res.status(200).json({ status: "ok" });
+    })
+);
+
 customerCheckoutRouter.use(requireAuth);
 
 // Creates a Razorpay order after validating the cart address products stock and optional promo code
@@ -82,7 +186,7 @@ customerCheckoutRouter.post(
             _id: {$in: foundCart.items.map((item) => item.product) //$in is a query operator -> find doc where field's value is present in a given list of values
             }
         })
-            .select("price salePercentage stock status")
+            .select("price salePercentage stock status title images colors")
             .lean();
 
         // Creates a quick product lookup using product ID so each cart item can be matched efficiently.
@@ -120,9 +224,21 @@ customerCheckoutRouter.post(
             totalItems += cartItem.quantity;
             subTotal += finalPrice * cartItem.quantity;
 
+            // Capture a point-in-time snapshot so order history remains
+            // correct even if the product is later updated or removed.
+            const coverImage =
+                product.images?.find((img) => img.isCover)?.url ||
+                product.images?.[0]?.url ||
+                "";
+
             return {
                 product: cartItem.product,
                 quantity: cartItem.quantity,
+                title: product.title || "",
+                image: coverImage,
+                unitPrice: finalPrice,
+                color: cartItem.color || "",
+                size: cartItem.size || "",
             };
             }
         );
@@ -291,26 +407,42 @@ customerCheckoutRouter.post(
             );
         }
 
-        //Reduce stock only after the payment has been cryptographically verified.
-        for ( const item of foundOrder.items) {
-            const updated = await Product.updateOne(
+        // Reduce stock only after the payment has been cryptographically verified,
+        // with rollback protection to keep database stock consistent if an item fails.
+        const decrementedItems = [];
+        try {
+            for (const item of foundOrder.items) {
+                const updated = await Product.updateOne(
                     {
                         _id: item.product,
-                        stock: {$gte:item.quantity}
+                        stock: { $gte: item.quantity },
                     },
                     {
                         $inc: {
-                            stock: -item.quantity
+                            stock: -item.quantity,
                         },
                     }
                 );
 
-            if (!updated.matchedCount) {
-                throw new ApiError(
-                    400,
-                    "One or more cart items are out of stock"
+                if (!updated.matchedCount) {
+                    throw new ApiError(
+                        400,
+                        `Item "${item.title || "Product"}" is out of stock`
+                    );
+                }
+
+                decrementedItems.push(item);
+            }
+        } catch (stockError) {
+            for (const item of decrementedItems) {
+                await Product.updateOne(
+                    { _id: item.product },
+                    { $inc: { stock: item.quantity } }
+                ).catch((err) =>
+                    console.error("Failed to restore stock on rollback:", err)
                 );
             }
+            throw stockError;
         }
 
         // Consume one promo usage after successful payment.

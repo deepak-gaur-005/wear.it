@@ -12,13 +12,14 @@ import {
   LogIn,
   LogOut,
   Menu,
+  Search,
   ShoppingBag,
   ShoppingBasket,
   ShoppingCart,
   Store,
   User,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 
 const collectionsPage = {
@@ -104,6 +105,17 @@ export function CustomerMobileNavbar({
   onOrdersOpen,
 }) {
   const [isMenuOpen, setMenuOpen] = useState(false);
+  const [mobileSearch, setMobileSearch] = useState("");
+  const navigate = useNavigate();
+
+  const handleMobileSearch = (e) => {
+    e.preventDefault();
+    if (mobileSearch.trim()) {
+      navigate(`/collections?search=${encodeURIComponent(mobileSearch.trim())}`);
+      setMobileSearch("");
+      setMenuOpen(false);
+    }
+  };
   const mobileAccountItems = isSignedIn
     ? [
         {
@@ -122,7 +134,18 @@ export function CustomerMobileNavbar({
             setMenuOpen(false);
           },
         },
-        { label: "Wishlist", href: "/wishlist", icon: Heart },
+        {
+          label: "Wishlist",
+          icon: Heart,
+          onClick: () => {
+            setMenuOpen(false);
+            // Open the wishlist dialog via its store (matches desktop behaviour).
+            import("@/features/customer/wishlist/store").then(
+              ({ useCustomerWishlistStore }) =>
+                useCustomerWishlistStore.getState().setOpen(true),
+            );
+          },
+        },
         {
           label: "Sign Out",
           icon: LogOut,
@@ -170,10 +193,21 @@ export function CustomerMobileNavbar({
           </SheetHeader>
 
           <div className={brandBlock}>
-            <Link to="/" className={brandWrap}>
+            <Link to="/" className={brandWrap} onClick={() => setMenuOpen(false)}>
               <Store className="h-10 w-10" />
               <span className={brandTitle}>wear.it</span>
             </Link>
+
+            <form onSubmit={handleMobileSearch} className="relative mt-4 flex items-center">
+              <Search className="absolute left-3 h-4 w-4 text-muted-foreground pointer-events-none" />
+              <input
+                type="text"
+                placeholder="Search collections..."
+                value={mobileSearch}
+                onChange={(e) => setMobileSearch(e.target.value)}
+                className="h-10 w-full rounded-lg border border-border bg-secondary/40 pl-9 pr-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+              />
+            </form>
           </div>
 
           <Separator />

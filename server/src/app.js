@@ -38,7 +38,13 @@ app.use(
     })
 );
 
-app.use(express.json());
+app.use(
+    express.json({
+        verify: (req, _res, buf) => {
+            req.rawBody = buf;
+        },
+    })
+);
 app.use(express.urlencoded({ extended: true}));
 app.use(cookieParser());
 app.use(morgan("dev"));
