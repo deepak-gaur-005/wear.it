@@ -13,6 +13,14 @@ const OrderItemsSchema = new mongoose.Schema(
       required: true,
       min: 1,
     },
+    // Snapshot fields captured at checkout so order history stays
+    // accurate even if the product is later edited or deleted.
+    // All fields are optional/defaulted so existing orders without them remain valid.
+    title:     { type: String, default: "", trim: true },
+    image:     { type: String, default: "", trim: true },
+    unitPrice: { type: Number, default: 0 },
+    color:     { type: String, default: "", trim: true },
+    size:      { type: String, default: "", trim: true },
   },
   { _id: false },
 );
@@ -69,6 +77,11 @@ const OrderSchema = new mongoose.Schema(
       required: true,
       min: 0,
     },
+    paymentMethod: {
+      type: String,
+      enum: ["razorpay", "points"],
+      default: "razorpay",
+    },
     paymentStatus: {
       type: String,
       enum: ["pending", "paid", "failed"],
@@ -76,7 +89,7 @@ const OrderSchema = new mongoose.Schema(
     },
     orderStatus: {
       type: String,
-      enum: ["placed", "shipped", "delivered", "returned"],
+      enum: ["placed", "shipped", "delivered", "returned", "cancelled"],
       default: "placed",
     },
     razorpayOrderId: {
@@ -98,6 +111,10 @@ const OrderSchema = new mongoose.Schema(
       default: null,
     },
     returnedAt: {
+      type: Date,
+      default: null,
+    },
+    cancelledAt: {
       type: Date,
       default: null,
     },

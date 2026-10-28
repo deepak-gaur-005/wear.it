@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { getCustomerCategories, getCustomerProducts } from "./api";
+import { getCustomerCategories, getCustomerProductFacets, getCustomerProducts } from "./api";
 
 export function useCustomerProductList() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -8,10 +8,12 @@ export function useCustomerProductList() {
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [availableColors, setAvailableColors] = useState([]);
+  const [availableBrands, setAvailableBrands] = useState([]);
   const [loadedQuery, setLoadedQuery] = useState(null);
 
   const filters = useMemo(
     () => ({
+      search: searchParams.get("search") || "",
       category: searchParams.get("category") || "",
       brand: searchParams.get("brand") || "",
       color: searchParams.get("color") || "",
@@ -24,22 +26,36 @@ export function useCustomerProductList() {
 
   const query = useMemo(
     () => ({
+      search: filters.search || undefined,
       category: filters.category || undefined,
       brand: filters.brand || undefined,
       color: filters.color || undefined,
-      sort,
       size: filters.size || undefined,
+      sort,
     }),
     [filters, sort],
   );
 
   const hasActiveFilters = Boolean(
-    filters.category || filters.brand || filters.color || filters.size,
+    filters.search || filters.category || filters.brand || filters.color || filters.size,
   );
 
   const updateParams = useCallback((nextParams) => {
     setSearchParams(nextParams);
   }, [setSearchParams]);
+
+  const setSearch = useCallback(
+    (term) => {
+      const nextParams = new URLSearchParams(searchParams);
+      if (term && term.trim()) {
+        nextParams.set("search", term.trim());
+      } else {
+        nextParams.delete("search");
+      }
+      updateParams(nextParams);
+    },
+    [searchParams, updateParams],
+  );
 
   const toggleFacet = (key, value) => {
     const nextParams = new URLSearchParams(searchParams);
@@ -72,6 +88,7 @@ export function useCustomerProductList() {
   const clearFilters = () => {
     const nextParams = new URLSearchParams(searchParams);
 
+    nextParams.delete("search");
     nextParams.delete("category");
     nextParams.delete("brand");
     nextParams.delete("size");
@@ -80,10 +97,17 @@ export function useCustomerProductList() {
     updateParams(nextParams);
   };
 
-  // available colors
   // active filter badges
   const activeFilterBadges = useMemo(() => {
     const items = [];
+
+    if (filters.search) {
+      items.push({
+        key: "search",
+        label: "Search",
+        value: `"${filters.search}"`,
+      });
+    }
 
     if (filters.category) {
       const found = categories.find(
@@ -164,26 +188,23 @@ export function useCustomerProductList() {
     };
   }, [query]);
 
+  // Load available facets from dedicated lightweight backend endpoint
   useEffect(() => {
     let active = true;
 
-    getCustomerProducts()
+    getCustomerProductFacets()
       .then((data) => {
-        const uniqueColors = new Set();
-
-        (data ?? []).forEach((item) => {
-          (item.colors ?? []).forEach((color) => uniqueColors.add(color));
-        });
-
-        if (active) {
-          setAvailableColors(
-            Array.from(uniqueColors).sort((a, b) => a.localeCompare(b)),
-          );
+        if (active && data) {
+          setAvailableColors(data.colors ?? []);
+          setAvailableBrands(data.brands ?? []);
         }
       })
       .catch((error) => {
-        console.error("Failed to load available colors:", error);
-        if (active) setAvailableColors([]);
+        console.error("Failed to load facets:", error);
+        if (active) {
+          setAvailableColors([]);
+          setAvailableBrands([]);
+        }
       });
 
     return () => {
@@ -200,8 +221,10 @@ export function useCustomerProductList() {
     hasActiveFilters,
     changeSort,
     availableColors,
+    availableBrands,
     toggleFacet,
     clearFilters,
+    setSearch,
     activeFilterBadges,
   };
 }

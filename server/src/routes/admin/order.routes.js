@@ -12,19 +12,20 @@ const ALLOWED_ORDER_STATUSES = [
     "shipped",
     "delivered",
     "returned",
+    "cancelled",
 ];
 
 export const adminOrderRouter = Router();
 
 adminOrderRouter.use(requireAdmin);
 
-// Fetches all orders for the admin panel.
+// Fetches all orders for the admin panel with items snapshots and delivery details.
 adminOrderRouter.get(
     "/orders",
     asyncHandler(async (req, res) => {
         const orders = await Order.find()
             .select(
-                "customerName customerEmail totalItems totalAmount paymentStatus orderStatus paidAt deliveredAt returnedAt createdAt"
+                "customerName customerEmail deliveryName deliveryAddress items totalItems totalAmount discountAmount promoCode paymentStatus orderStatus paidAt deliveredAt returnedAt cancelledAt createdAt"
             )
             .sort({ createdAt: -1 })
             .lean();
@@ -40,6 +41,10 @@ adminOrderRouter.get(
                             .toUpperCase(),
                         customerName: orderItem.customerName,
                         customerEmail: orderItem.customerEmail,
+                        deliveryName: orderItem.deliveryName || "",
+                        deliveryAddress: orderItem.deliveryAddress || "",
+                        discountAmount: orderItem.discountAmount || 0,
+                        promoCode: orderItem.promoCode || "",
                         totalItems: orderItem.totalItems,
                         totalAmount: orderItem.totalAmount,
                         paymentStatus: orderItem.paymentStatus,
@@ -47,7 +52,17 @@ adminOrderRouter.get(
                         paidAt: orderItem.paidAt,
                         deliveredAt: orderItem.deliveredAt,
                         returnedAt: orderItem.returnedAt,
+                        cancelledAt: orderItem.cancelledAt,
                         createdAt: orderItem.createdAt,
+                        items: (orderItem.items || []).map((item) => ({
+                            product: String(item.product),
+                            quantity: item.quantity,
+                            title: item.title || "",
+                            image: item.image || "",
+                            unitPrice: item.unitPrice || 0,
+                            color: item.color || "",
+                            size: item.size || "",
+                        })),
                     })),
                 },
                 "Orders fetched successfully"
@@ -56,7 +71,7 @@ adminOrderRouter.get(
     })
 );
 
-// Updates an order status and handles delivery or return actions.
+// Updates an order status with safe transition checks and inventory restoration.
 adminOrderRouter.patch(
     "/orders/:orderId/status",
     asyncHandler(async (req, res) => {
@@ -93,25 +108,46 @@ adminOrderRouter.patch(
             404
         );
 
-        // Return the products to stock when an order is returned.
+        // Terminal states cannot be transitioned
+        if (
+            foundOrder.orderStatus === "returned" ||
+            foundOrder.orderStatus === "cancelled"
+        ) {
+            throw new ApiError(
+                400,
+                `Cannot change status of an order that is already ${foundOrder.orderStatus}`
+            );
+        }
+
+        // Return products to stock when an order is returned
         if (
             orderStatus === "returned" &&
             foundOrder.orderStatus !== "returned"
         ) {
             for (const item of foundOrder.items) {
                 await Product.updateOne(
-                    {
-                        _id: item.product,
-                    },
-                    {
-                        $inc: {
-                            stock: item.quantity,
-                        },
-                    }
+                    { _id: item.product },
+                    { $inc: { stock: item.quantity } }
                 );
             }
-
             foundOrder.returnedAt = new Date();
+        }
+
+        // Return products to stock when an order is cancelled
+        if (
+            orderStatus === "cancelled" &&
+            foundOrder.orderStatus !== "cancelled"
+        ) {
+            // Only restore stock if payment was paid and stock was deducted
+            if (foundOrder.paymentStatus === "paid") {
+                for (const item of foundOrder.items) {
+                    await Product.updateOne(
+                        { _id: item.product },
+                        { $inc: { stock: item.quantity } }
+                    );
+                }
+            }
+            foundOrder.cancelledAt = new Date();
         }
 
         // Store the time when the order was delivered.
@@ -134,6 +170,7 @@ adminOrderRouter.patch(
                     orderStatus: foundOrder.orderStatus,
                     deliveredAt: foundOrder.deliveredAt,
                     returnedAt: foundOrder.returnedAt,
+                    cancelledAt: foundOrder.cancelledAt,
                 },
                 "Order status updated successfully"
             )

@@ -54,6 +54,11 @@ const userSchema = new mongoose.Schema(
             enum: ["user", "admin"],
             default: "user",
         },
+        points: {
+            type: Number,
+            default: 0,
+            min: 0,
+        },
         addresses: {
             type: [addressSchema],
             default: [],

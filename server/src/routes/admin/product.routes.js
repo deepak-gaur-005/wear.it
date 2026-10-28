@@ -312,13 +312,33 @@ adminProductRouter.put(
         isCover: image.isCover,
     }));
 
-    const existingImages = (product.images || []).map((img) => ({
-        url: img.url,
-        publicId: img.publicId,
-        isCover: img.isCover,
-    }));
+    // The client sends back only the images it wants to keep via
+    // `existingImages` (as a JSON string). We use that list, not the
+    // database copy, so intentionally removed images are honoured.
+    let keptImages = [];
+    try {
+        const raw = req.body.existingImages;
+        const parsed = typeof raw === "string" ? JSON.parse(raw) : (raw ?? []);
+        keptImages = Array.isArray(parsed)
+            ? parsed
+                .filter((img) => img && img.publicId && img.url)
+                .map((img) => ({
+                    url: img.url,
+                    publicId: img.publicId,
+                    isCover: Boolean(img.isCover),
+                }))
+            : [];
+    } catch {
+        // If parsing fails fall back to all images currently in the DB
+        // so we never accidentally wipe images on a malformed request.
+        keptImages = (product.images || []).map((img) => ({
+            url: img.url,
+            publicId: img.publicId,
+            isCover: img.isCover,
+        }));
+    }
 
-    const mergedImages = [...existingImages, ...newlyAddedImages];
+    const mergedImages = [...keptImages, ...newlyAddedImages];
 
     if (!mergedImages.length) {
         throw new ApiError(400, "At least one image is needed");
