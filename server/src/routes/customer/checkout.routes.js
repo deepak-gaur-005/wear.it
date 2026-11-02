@@ -9,13 +9,19 @@ import { Order } from "../../models/order.model.js";
 
 import {getDbUserFromReq, requireAuth} from "../../middlewares/auth.middleware.js";
 import { asyncHandler } from "../../utils/AsyncHandler.js";
-import {requireFound, requireText } from "../../utils/helper.js";
+import {requireFound, requireText, requireObjectId } from "../../utils/helper.js";
+import { createRateLimiter } from "../../middlewares/rateLimiter.middleware.js";
 
 import { ApiError } from "../../utils/ApiError.js";
 import { ApiResponse } from "../../utils/ApiResponse.js";
 
 import {razorpay, toSubUnits} from "../../utils/razorpay.js";
 
+const checkoutSessionLimiter = createRateLimiter({
+    windowMs: 60 * 1000,
+    max: 10,
+    message: "Too many checkout requests. Please wait a moment before trying again.",
+});
 
 export const customerCheckoutRouter = Router();
 
@@ -128,6 +134,7 @@ customerCheckoutRouter.use(requireAuth);
 // Creates a Razorpay order after validating the cart address products stock and optional promo code
 customerCheckoutRouter.post(
     "/checkout/create-session",
+    checkoutSessionLimiter,
 
     asyncHandler(async (req, res) => {
         const dbUser = await getDbUserFromReq(req);
@@ -138,6 +145,7 @@ customerCheckoutRouter.post(
             .toUpperCase();
 
         requireText( addressId, "Address is required");
+        requireObjectId( addressId, "Invalid address ID format");
 
         // fetch user and cart together because both are required to create the checkout session
         const [user, cart] = await Promise.all([

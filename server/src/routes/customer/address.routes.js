@@ -7,6 +7,27 @@ import { requireFound, requireText } from "../../utils/helper.js";
 import { ApiError } from "../../utils/ApiError.js";
 
 
+function validateAddressPayload({ fullName, address, state, postalCode }) {
+    requireText(fullName, "Full name is required");
+    requireText(address, "Address is required");
+    requireText(state, "State is required");
+    requireText(postalCode, "Postal code is required");
+
+    if (fullName.length < 2 || fullName.length > 100) {
+        throw new ApiError(400, "Full name must be between 2 and 100 characters");
+    }
+    if (address.length < 5 || address.length > 300) {
+        throw new ApiError(400, "Address must be between 5 and 300 characters");
+    }
+    if (state.length < 2 || state.length > 50) {
+        throw new ApiError(400, "State must be between 2 and 50 characters");
+    }
+    const cleanPostal = postalCode.replace(/\s+/g, "");
+    if (!/^[a-zA-Z0-9-]{3,10}$/.test(cleanPostal)) {
+        throw new ApiError(400, "Postal code must be a valid format (3-10 characters)");
+    }
+}
+
 function mapAddress(item) {  //convert address document into clean api response
     return {
         _id: String(item._id || ""),
@@ -20,7 +41,7 @@ function mapAddress(item) {  //convert address document into clean api response
 
 export const customerAddressRouter = Router();
 
-customerAddressRouter.use(requireAuth)
+customerAddressRouter.use("/addresses", requireAuth);
 
 customerAddressRouter.get(
     "/addresses",
@@ -67,10 +88,7 @@ customerAddressRouter.post(
         const state = String(req.body.state || "").trim();
         const postalCode = String(req.body.postalCode || "").trim();
 
-        requireText(fullName,"Full name is required");
-        requireText(address,"Address is required");
-        requireText(state,"State is required");
-        requireText(postalCode,"Postal code is required");
+        validateAddressPayload({ fullName, address, state, postalCode });
 
         const user =    await User.findById(dbUser._id);
 
@@ -142,10 +160,7 @@ customerAddressRouter.patch(
         const state = String(req.body.state || "").trim();
         const postalCode = String(req.body.postalCode || "").trim();
 
-        requireText(fullName, "Full name is required");
-        requireText(address, "Address is required");
-        requireText(state, "State is required");
-        requireText(postalCode, "postal code is required");
+        validateAddressPayload({ fullName, address, state, postalCode });
 
         const user =    await User.findById(dbUser._id);
 

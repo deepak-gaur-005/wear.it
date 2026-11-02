@@ -22,11 +22,25 @@ function mapBanner(item) {
 
 const BANNER_FOLDER = "ecommerce-wearit-video/banners";
 
+const ALLOWED_IMAGE_MIMES = new Set([
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "image/avif",
+]);
+
 const upload = multer({
     storage: multer.memoryStorage(),
     limits: {
         fileSize: 5 * 1024 * 1024,
         files: 10,
+    },
+    fileFilter: (_req, file, cb) => {
+        if (ALLOWED_IMAGE_MIMES.has(file.mimetype)) {
+            cb(null, true);
+        } else {
+            cb(new ApiError(400, "Only JPEG, PNG, WEBP, and AVIF images are permitted"));
+        }
     },
 });
 

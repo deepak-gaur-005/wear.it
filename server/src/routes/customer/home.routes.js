@@ -27,8 +27,9 @@ customerHomeRouter.get(
 
                 Product.find({ status: "active" })
                     .select(
-                        "title brand price salePercentage images createdAt"
+                        "title brand price salePercentage images createdAt stock category"
                     )
+                    .populate("category", "name")
                     .sort({ createdAt: -1 })
                     .limit(4)
                     .lean(),
@@ -87,6 +88,9 @@ customerHomeRouter.get(
                                 brand:
                                     recentProductItem.brand,
                                 image,
+                                images: recentProductItem.images || (image ? [{ url: image, isCover: true }] : []),
+                                category: recentProductItem.category,
+                                stock: recentProductItem.stock,
                                 price:
                                     recentProductItem.price,
                                 finalPrice,

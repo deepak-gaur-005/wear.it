@@ -1,11 +1,17 @@
 import { Router } from "express";
 import { requireAuth } from "../../middlewares/auth.middleware.js";
+import { createRateLimiter } from "../../middlewares/rateLimiter.middleware.js";
 import { asyncHandler } from "../../utils/AsyncHandler.js";
 import { requireText } from "../../utils/helper.js";
 import { ApiError } from "../../utils/ApiError.js";
 import { ApiResponse } from "../../utils/ApiResponse.js";   
 import { Promo } from "../../models/promo.model.js";
 
+const promoLimiter = createRateLimiter({
+    windowMs: 60 * 1000,
+    max: 15,
+    message: "Too many coupon attempts. Please wait a moment before trying again.",
+});
 
 export const customerPromoRouter = Router();
 
@@ -13,7 +19,7 @@ customerPromoRouter.use(requireAuth); // Customer must be logged in
 
 customerPromoRouter.post(
     "/promos/apply",
-
+    promoLimiter,
     asyncHandler(async (req, res) => {
 
         const code = String(req.body.code || "")

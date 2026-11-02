@@ -13,12 +13,26 @@ export const adminProductRouter = Router();
 
 const ok = (data, message = "Success") => new ApiResponse(200, data, message);
 
+const ALLOWED_IMAGE_MIMES = new Set([
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "image/avif",
+]);
+
 const upload = multer({
     storage: multer.memoryStorage(),
     limits: {
-        fieldSize: 5 * 1024 * 1024,
+        fileSize: 5 * 1024 * 1024, // 5MB limit
         files: 10,
-    }
+    },
+    fileFilter: (_req, file, cb) => {
+        if (ALLOWED_IMAGE_MIMES.has(file.mimetype)) {
+            cb(null, true);
+        } else {
+            cb(new ApiError(400, "Only JPEG, PNG, WEBP, and AVIF images are permitted"));
+        }
+    },
 });
 
 adminProductRouter.use(requireAdmin);
@@ -193,6 +207,32 @@ adminProductRouter.post(
     requireNumber(salePercentage, "Sale Percentage is required");
     requireNumber(stock, "Stock is required");
 
+    if (price < 0) {
+      throw new ApiError(400, "Price cannot be negative");
+    }
+    if (stock < 0 || !Number.isInteger(stock)) {
+      throw new ApiError(400, "Stock must be a non-negative integer");
+    }
+    if (salePercentage < 0 || salePercentage > 100) {
+      throw new ApiError(400, "Sale percentage must be between 0 and 100");
+    }
+
+    const normalizeList = (val) => {
+      if (Array.isArray(val)) return val;
+      if (typeof val === "string") {
+        try {
+          const parsed = JSON.parse(val);
+          if (Array.isArray(parsed)) return parsed;
+        } catch {
+          return val.trim() ? [val.trim()] : [];
+        }
+      }
+      return val ? [val] : [];
+    };
+
+    const finalColors = normalizeList(colors);
+    const finalSizes = normalizeList(sizes);
+
     const existingCategory = await Category.findById(category);
 
     requireFound(existingCategory, "Category not found", 404);
@@ -241,8 +281,8 @@ adminProductRouter.post(
       category,
       brand,
       images,
-      colors,
-      sizes,
+      colors: finalColors,
+      sizes: finalSizes,
       price,
       salePercentage,
       stock,
@@ -294,6 +334,32 @@ adminProductRouter.put(
     requireNumber(price, "Price is required");
     requireNumber(salePercentage, "Sale Percentage is required");
     requireNumber(stock, "Stock is required");
+
+    if (price < 0) {
+      throw new ApiError(400, "Price cannot be negative");
+    }
+    if (stock < 0 || !Number.isInteger(stock)) {
+      throw new ApiError(400, "Stock must be a non-negative integer");
+    }
+    if (salePercentage < 0 || salePercentage > 100) {
+      throw new ApiError(400, "Sale percentage must be between 0 and 100");
+    }
+
+    const normalizeList = (val) => {
+      if (Array.isArray(val)) return val;
+      if (typeof val === "string") {
+        try {
+          const parsed = JSON.parse(val);
+          if (Array.isArray(parsed)) return parsed;
+        } catch {
+          return val.trim() ? [val.trim()] : [];
+        }
+      }
+      return val ? [val] : [];
+    };
+
+    const finalColors = normalizeList(colors);
+    const finalSizes = normalizeList(sizes);
 
     const existingCategoryDoc = await Category.findById(category);
     const existingCategory = requireFound(existingCategoryDoc, "Category not found");
@@ -356,8 +422,8 @@ adminProductRouter.put(
     product.description = description;
     product.category = existingCategory._id;
     product.brand = brand;
-    product.colors = colors;
-    product.sizes = sizes;
+    product.colors = finalColors;
+    product.sizes = finalSizes;
     product.price = price;
     product.salePercentage = salePercentage;
     product.stock = stock;

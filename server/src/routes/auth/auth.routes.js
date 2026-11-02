@@ -1,15 +1,23 @@
 import { Router } from "express";
 import { requireAuth } from "../../middlewares/auth.middleware.js";
+import { createRateLimiter } from "../../middlewares/rateLimiter.middleware.js";
 import { asyncHandler } from "../../utils/AsyncHandler.js";
 import { clerkClient, getAuth } from "@clerk/express";
 import { ApiError } from "../../utils/ApiError.js";
 import { User } from "../../models/user.model.js";
+
+const authSyncLimiter = createRateLimiter({
+    windowMs: 60 * 1000,
+    max: 30,
+    message: "Too many authentication requests. Please try again shortly.",
+});
 
 export const authRouter = Router();
 
 authRouter.post(
     "/sync",
     requireAuth,
+    authSyncLimiter,
 
     asyncHandler(async (req, res) => {
         const { userId } = getAuth(req);
@@ -50,10 +58,6 @@ authRouter.post(
                 .filter(Boolean)
         );
 
-        // if the current user is existing user or not 
-        // update/do nothing
-        // create the user and save in our db with
-
         const existingUser = await User.findOne({
             clerkUserId: userId,
         });
@@ -61,11 +65,6 @@ authRouter.post(
         const shouldBeAdmin = email
             ? adminEmails.has(email.toLowerCase())
             : false;
-
-        console.log("ADMIN_EMAILS:", process.env.ADMIN_EMAILS);
-        console.log("CLERK EMAIL:", email);
-        console.log("SHOULD BE ADMIN:", shouldBeAdmin);
-        console.log("EXISTING ROLE:", existingUser?.role);
 
         const nextRole =
             existingUser?.role === "admin" 
