@@ -12,7 +12,7 @@ import { MapPin, PackageCheck, ShoppingBag } from "lucide-react";
 const dialogClass =
   "max-h-[92vh] overflow-y-auto border-border bg-background sm:max-w-2xl";
 const listClass = "space-y-4";
-const orderClass = "space-y-3.5 border border-border/70 bg-card/90 p-4 rounded-md shadow-xs";
+const orderClass = "space-y-3.5 rounded-2xl border border-border/60 bg-card/90 p-4 shadow-xs";
 const headerClass = "flex flex-wrap items-start justify-between gap-3 border-b border-border/40 pb-3";
 const codeClass = "font-medium tracking-tight";
 const metaClass = "text-xs text-muted-foreground";

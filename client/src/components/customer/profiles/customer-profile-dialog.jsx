@@ -34,7 +34,7 @@ const sectionHeaderClass = "flex items-center justify-between gap-3";
 const sectionTitleClass = "text-lg font-semibold text-foreground";
 
 const listClass = "space-y-3";
-const itemClass = "space-y-3 border border-border/60 bg-card/80 p-4";
+const itemClass = "space-y-3 rounded-xl border border-border/60 bg-card/80 p-4";
 const itemTopClass = "flex flex-wrap items-start justify-between gap-3";
 const itemTextClass = "space-y-1";
 const defaultClass =
@@ -42,14 +42,14 @@ const defaultClass =
 const nameClass = "font-medium text-foreground";
 const addressClass = "text-sm text-muted-foreground";
 const actionRowClass = "flex gap-2";
-const buttonClass = "rounded-none";
+const buttonClass = "rounded-lg";
 const emptyClass = "text-sm text-muted-foreground";
 
-const formWrapClass = "space-y-4 border border-border/60 bg-card/80 p-5";
+const formWrapClass = "space-y-4 rounded-xl border border-border/60 bg-card/80 p-5";
 const twoColumnClass = "grid gap-4 sm:grid-cols-2";
 
 const fieldClass = "space-y-2";
-const inputClass = "rounded-none";
+const inputClass = "rounded-lg";
 const checkboxRowClass =
   "flex items-center gap-3 border border-border bg-secondary/40 px-3 py-3 text-sm text-foreground";
 const checkboxClass = "h-4 w-4 accent-[var(--primary)]";

@@ -58,15 +58,18 @@ const ProductSchema = new mongoose.Schema(
         sizes: {
             type: [String],
             default: [],
-            enum: ["S","M","L","XL"],
+            enum: ["XS", "S", "M", "L", "XL", "XXL", "Free Size"],
         },
         price: {
             type: Number,
             required: true,
+            min: 0,
         },
         salePercentage: {
             type: Number,
             default: 0,
+            min: 0,
+            max: 100,
         },
         status: {
             type: String,

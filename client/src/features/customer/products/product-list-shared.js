@@ -35,6 +35,13 @@ const COLOR_MAP = {
 };
 
 export function getCoverImage(product) {
+  if (!product) return "";
+  if (typeof product.image === "string" && product.image.trim()) {
+    return product.image.trim();
+  }
+  if (typeof product.imageUrl === "string" && product.imageUrl.trim()) {
+    return product.imageUrl.trim();
+  }
   return (
     product.images?.find((item) => item.isCover)?.url ||
     product.images?.[0]?.url ||

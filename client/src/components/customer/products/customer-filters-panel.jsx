@@ -13,7 +13,7 @@ const panelHeaderClass = "flex items-center justify-between gap-3";
 
 const titleClass = "text-base font-semibold text-foreground";
 
-const clearButtonClass = "rounded-none px-2 text-sm";
+const clearButtonClass = "rounded-lg px-2 text-sm";
 
 const sectionClass = "space-y-3";
 
@@ -21,7 +21,7 @@ const sectionTitleClass = "text-sm font-medium text-foreground";
 
 const stackedOptionsClass = "space-y-1";
 
-const fullWidthButtonClass = "w-full justify-start rounded-none";
+const fullWidthButtonClass = "w-full justify-start rounded-lg";
 
 const colorsWrapClass = "flex flex-wrap gap-3";
 
@@ -30,7 +30,7 @@ const colorButtonBaseClass =
 
 const colorButtonActiveClass = "text-foreground";
 
-const colorSwatchBaseClass = "h-8 w-8 border";
+const colorSwatchBaseClass = "h-8 w-8 rounded-full border";
 
 const colorSwatchActiveClass = "border-primary ring-2 ring-primary/30";
 
@@ -38,7 +38,7 @@ const colorSwatchInactiveClass = "border-border";
 
 const sizesWrapClass = "flex flex-wrap gap-2";
 
-const sizeButtonClass = "min-w-12 rounded-none";
+const sizeButtonClass = "min-w-12 rounded-lg";
 
 function CustomerFiltersPanel({
   categories,

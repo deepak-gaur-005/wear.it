@@ -17,12 +17,12 @@ const contentClass = "space-y-4";
 const listClass = "space-y-3";
 
 const itemClass =
-  "flex items-start gap-3 border border-border/60 bg-card/80 p-3";
+  "flex items-start gap-3 rounded-xl border border-border/60 bg-card/80 p-3";
 
-const imageClass = "h-20 w-16 shrink-0 object-cover";
+const imageClass = "h-20 w-16 shrink-0 rounded-lg object-cover";
 
 const noImageClass =
-  "flex h-20 w-16 shrink-0 items-center justify-center bg-muted text-xs text-muted-foreground";
+  "flex h-20 w-16 shrink-0 rounded-lg items-center justify-center bg-muted text-xs text-muted-foreground";
 
 const bodyClass = "min-w-0 flex-1 space-y-1";
 
@@ -35,9 +35,7 @@ const priceClass = "text-sm font-semibold text-foreground";
 
 const actionsClass = "flex gap-2 pt-1";
 
-const buttonClass = "h-8 rounded-none px-3 text-xs";
-
-const emptyClass = "text-sm text-muted-foreground";
+const buttonClass = "h-8 rounded-lg px-3 text-xs";
 
 const iconClass = "h-4 w-4";
 
@@ -62,7 +60,13 @@ function CustomerWishlistDialog() {
 
         <div className={contentClass}>
           {!items.length ? (
-            <p className={emptyClass}>No Products</p>
+            <div className="py-12 text-center space-y-3">
+              <Heart className="mx-auto h-8 w-8 text-muted-foreground/40" />
+              <p className="text-sm font-medium text-foreground">Your wishlist is empty</p>
+              <p className="text-xs text-muted-foreground max-w-xs mx-auto">
+                Save items you love by tapping the heart icon on any product page.
+              </p>
+            </div>
           ) : null}
 
           {items.length ? (
@@ -111,7 +115,8 @@ function CustomerWishlistDialog() {
 
                       <Button
                         type="button"
-                        className={buttonClass}
+                        variant="ghost"
+                        className={`${buttonClass} text-muted-foreground hover:text-destructive hover:bg-transparent`}
                         onClick={() => void removeItem(item.productId)}
                       >
                         <Trash2 className={trashIcon} />
