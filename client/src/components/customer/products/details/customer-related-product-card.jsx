@@ -20,7 +20,7 @@ function CustomerProductRelatedCard({
   return (
     <div className="group relative flex flex-col overflow-hidden transition-all duration-300">
       {/* Card Image Container with rounded-xl corners matching reference */}
-      <div className="relative aspect-[3/4] w-full overflow-hidden rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-border/60">
+      <div className="relative aspect-3/4 w-full overflow-hidden rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-border/60">
         <Link to={`/collection/${product._id}`} className="block h-full w-full">
           {coverImage ? (
             <>

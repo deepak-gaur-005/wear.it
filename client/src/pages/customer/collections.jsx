@@ -125,7 +125,7 @@ function Collections() {
                   placeholder="Search collections..."
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
-                  className="pl-9 pr-8 h-9 w-[220px] sm:w-[260px] rounded-full bg-card text-xs sm:text-sm"
+                  className="pl-9 pr-8 h-9 w-220px sm:w-260px rounded-full bg-card text-xs sm:text-sm"
                 />
                 {searchInput ? (
                   <button
