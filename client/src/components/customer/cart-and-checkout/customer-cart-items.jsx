@@ -15,8 +15,8 @@ const scrollClass = "min-h-0 flex-1 overflow-y-auto";
 const listClass = "space-y-4 p-5";
 
 const itemClass =
-  "group flex gap-4 border border-border/60 bg-card p-3 shadow-sm transition-colors hover:border-primary/40 hover:bg-secondary/30";
-const imageClass = "h-24 w-20 shrink-0 border border-border object-cover";
+  "group flex gap-4 rounded-xl border border-border/60 bg-card p-3 shadow-sm transition-colors hover:border-primary/40 hover:bg-secondary/30";
+const imageClass = "h-24 w-20 shrink-0 rounded-lg border border-border/50 object-cover";
 
 const textWrapClass = "min-w-0 flex-1 space-y-1.5";
 const brandClass =
@@ -28,19 +28,19 @@ const priceClass = "text-sm font-semibold text-foreground";
 
 const footerRowClass = "flex flex-wrap items-center justify-between gap-3 pt-2";
 const qtyWrapClass =
-  "flex items-center overflow-hidden border border-border bg-background";
+  "flex items-center overflow-hidden rounded-lg border border-border bg-background";
 const qtyButtonClass = "h-9 w-9 rounded-none px-0";
 const qtyIconClass = "h-3.5 w-3.5";
 const qtyValueClass =
   "flex h-9 min-w-10 items-center justify-center border-x border-border px-2 text-sm font-medium";
 
-const removeButtonClass = "h-9 border-border px-3 text-xs text-white";
-const removeIconClass = "mr-2 h-3.5 w-3.5";
+const removeButtonClass = "h-9 px-2 text-xs text-muted-foreground hover:text-destructive hover:bg-transparent";
+const removeIconClass = "mr-1.5 h-3.5 w-3.5";
 
 const emptyWrapClass =
-  "flex min-h-[320px] flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/30 px-6 text-center";
+  "flex min-h-[320px] flex-col items-center justify-center rounded-md border border-dashed border-border bg-muted/20 px-6 py-12 text-center";
 
-const emptyTitleClass = "text-base font-semibold text-foreground";
+const emptyTitleClass = "text-base font-medium text-foreground mb-1";
 
 function CustomerCartItems() {
   const { isSignedIn } = useAuth();
@@ -61,7 +61,15 @@ function CustomerCartItems() {
         <div className={listClass}>
           {!cart.items.length ? (
             <div className={emptyWrapClass}>
-              <p className={emptyTitleClass}>Your cart is empty</p>
+              <p className={emptyTitleClass}>Your cart is currently empty</p>
+              <p className="text-xs text-muted-foreground mb-4">
+                Discover our latest season garments and essentials.
+              </p>
+              <Link to="/collections" onClick={() => setOpen(false)}>
+                <Button size="sm" variant="outline" className="rounded-lg text-xs uppercase tracking-wider">
+                  Explore Collections
+                </Button>
+              </Link>
             </div>
           ) : (
             cart.items.map((item, index) => (
@@ -99,7 +107,7 @@ function CustomerCartItems() {
                     <div className={qtyWrapClass}>
                       <Button
                         type="button"
-                        variant="default"
+                        variant="ghost"
                         className={qtyButtonClass}
                         onClick={() =>
                           void decrease(item, Boolean(isSignedIn))
@@ -114,7 +122,7 @@ function CustomerCartItems() {
 
                       <Button
                         type="button"
-                        variant="default"
+                        variant="ghost"
                         className={qtyButtonClass}
                         onClick={() =>
                           void increase(item, Boolean(isSignedIn))
@@ -127,7 +135,7 @@ function CustomerCartItems() {
 
                     <Button
                       type="button"
-                      variant="default"
+                      variant="ghost"
                       className={removeButtonClass}
                       onClick={() => void remove(item, Boolean(isSignedIn))}
                     >

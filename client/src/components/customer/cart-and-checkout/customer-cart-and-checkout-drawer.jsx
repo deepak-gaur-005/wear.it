@@ -16,7 +16,7 @@ import { formatPrice } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 
 const contentClass =
-  "ml-auto flex h-[90dvh] max-h-[90dvh] w-full overflow-hidden rounded-none border-l border-border bg-background p-0";
+  "ml-auto flex h-[90dvh] max-h-[90dvh] w-full overflow-hidden rounded-tl-2xl rounded-bl-2xl border-l border-border bg-background p-0";
 
 const shellClass = "grid h-full min-h-0 w-full lg:grid-cols-[1.7fr_1fr]";
 const leftPaneClass =
@@ -35,12 +35,12 @@ const bodyClass = "space-y-4 px-5 py-4";
 
 const sectionTitleClass = "text-sm font-medium text-foreground";
 const helperClass = "text-xs text-muted-foreground";
-const cardClass = "border border-border bg-background/50 p-3 text-sm";
+const cardClass = "border border-border/50 rounded-xl bg-background/50 p-3 text-sm";
 const rowClass = "flex items-center justify-between text-sm";
 const totalRowClass = "flex items-center justify-between border-t border-border pt-4 text-base font-semibold";
 
 const promoRowClass = "flex gap-2";
-const promoInputClass = "rounded-none";
+const promoInputClass = "rounded-lg";
 const actionClass = "shrink-0 space-y-3 border-t border-border px-5 py-4";
 const primaryButtonClass = "h-11 w-full";
 

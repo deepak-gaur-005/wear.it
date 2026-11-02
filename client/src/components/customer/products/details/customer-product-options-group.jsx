@@ -15,11 +15,11 @@ const activeButtonClass =
 const inactiveButtonClass =
   "border-border bg-secondary text-secondary-foreground hover:border-primary/40";
 
-const sizeButtonClass = "min-w-12 rounded-none";
+const sizeButtonClass = "min-w-12 rounded-lg";
 
-const colorButtonClass = "rounded-none";
+const colorButtonClass = "rounded-lg";
 
-const swatchClass = "h-4 w-4 border border-border";
+const swatchClass = "h-4 w-4 rounded-sm border border-border";
 
 function CustomerProductOptionsGroup({
   values,
