@@ -1,252 +1,174 @@
 import { CommonLoader } from "@/components/common/loader";
+import CustomerProductCard from "@/components/customer/products/customer-product-card";
+import { HomeBannerCarousel } from "@/components/customer/home/home-banner-carousel";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { useCustomerHomeStore } from "@/features/customer/home/store";
-import { formatPrice } from "@/lib/utils";
-import { ArrowRight, Grid2X2, TicketPercent } from "lucide-react";
-import { useEffect } from "react";
+import { ArrowRight, Check, Copy, Grid2X2, Sparkles, Tag } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-
-const pageWrapClass =
-  "min-h-screen bg-background antialiased selection:bg-primary/20";
-const contentContainerClass = "mx-auto max-w-7xl px-4 py-0 sm:px-6 lg:px-8";
-const sectionStackClass = "space-y-18";
-
-const sectionHeadClass = "mb-10 space-y-3";
-const sectionEyebrowClass =
-  "text-xs font-bold uppercase tracking-[0.3em] text-primary/80";
-const sectionTitleClass =
-  "text-3xl font-medium tracking-tight text-foreground sm:text-4xl lg:text-5xl";
-
-const bannerGridClass = "grid gap-6 lg:grid-cols-[1.6fr_1fr]";
-const bannerMainCardClass =
-  "group relative overflow-hidden rounded-[2rem] border border-border/30 bg-card shadow-xl transition-all duration-500 hover:shadow-2xl hover:shadow-primary/5";
-const bannerMainImageClass =
-  "h-[540px] w-full object-cover transition-all duration-700 group-hover:scale-105";
-
-const bannerSideGridClass = "grid gap-6 sm:grid-cols-2 lg:grid-cols-1";
-const bannerSideCardClass =
-  "group overflow-hidden rounded-[2rem] border border-border/40 bg-card shadow-lg transition-all duration-500 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/5";
-const bannerSideImageClass =
-  "h-[258px] w-full object-cover transition-all duration-700 group-hover:scale-105";
-
-const categoryGridClass = "grid gap-6 sm:grid-cols-2 xl:grid-cols-4";
-const categoryCardClass =
-  "group relative overflow-hidden rounded-[2rem] border border-border/40 bg-card p-1.5 transition-all duration-500 hover:-translate-y-1 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5";
-const categoryContentClass =
-  "h-full space-y-5 rounded-[1.6rem] bg-gradient-to-br from-background/50 to-muted/30 p-8 backdrop-blur-sm transition-colors duration-500 group-hover:bg-background/80";
-const categoryIconWrapClass =
-  "flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/5 text-primary ring-1 ring-primary/10 transition-transform duration-500 group-hover:scale-110 group-hover:bg-primary/10";
-const categoryIconClass = "h-6 w-6";
-const categoryTextWrapClass = "space-y-2";
-const categoryTitleClass = "text-xl font-medium tracking-tight text-foreground";
-const categoryLinkClass =
-  "inline-flex items-center gap-2 text-sm font-semibold text-primary transition-colors group-hover:text-primary/80";
-const categoryArrowIconClass =
-  "h-4 w-4 transition-transform group-hover:translate-x-1";
-
-const couponGridClass = "grid gap-6 md:grid-cols-2 xl:grid-cols-4";
-const couponCardClass =
-  "group relative overflow-hidden rounded-[2rem] border border-dashed border-primary/20 bg-primary/[0.02] transition-all duration-300 hover:border-primary/40 hover:bg-primary/[0.04]";
-const couponContentClass = "space-y-6 p-8";
-const couponIconWrapClass =
-  "flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary transition-transform duration-500 group-hover:rotate-12";
-const couponIconClass = "h-6 w-6";
-const couponCodeClass = "text-2xl font-bold tracking-widest text-primary";
-
-const couponBadgeClass =
-  "border-primary/20 bg-primary/10 px-3 py-1 text-sm font-medium text-primary hover:bg-primary/20";
-const couponCodeWrapClass = "space-y-1 pt-2";
-const couponCodeLabelClass =
-  "text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground";
-
-const productGridClass = "grid gap-6 sm:grid-cols-2 xl:grid-cols-4";
-const productCardClass =
-  "group flex h-full flex-col overflow-hidden rounded-[2rem] border border-border/40 bg-card p-2 transition-all duration-500 hover:-translate-y-1 hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/5";
-const productContentClass =
-  "flex flex-1 flex-col justify-between space-y-5 p-4";
-const productImageWrapClass =
-  "relative aspect-[4/5] w-full overflow-hidden rounded-2xl bg-muted/30";
-const productImageClass =
-  "h-full w-full object-cover transition-all duration-700 group-hover:scale-105";
-const productInfoWrapClass = "space-y-3";
-const productBrandRowClass = "flex items-center justify-between gap-3";
-const productBrandClass =
-  "text-xs font-semibold uppercase tracking-wider text-muted-foreground";
-const productTitleClass =
-  "line-clamp-2 text-base font-medium leading-relaxed text-foreground transition-colors group-hover:text-primary";
-const productPriceRowClass = "flex items-end justify-between gap-3 pt-2";
-const productPriceClass =
-  "text-xl font-semibold tracking-tight text-foreground";
-const productOriginalPriceClass =
-  "text-sm font-medium text-muted-foreground line-through decoration-muted-foreground/50";
-const productViewClass =
-  "inline-flex h-8 items-center justify-center rounded-full bg-primary/5 px-4 text-xs font-semibold text-primary opacity-0 transition-all duration-300 group-hover:bg-primary/10 group-hover:opacity-100";
+import { toast } from "sonner";
 
 export function StoreHome() {
   const { data, loading, loadHome } = useCustomerHomeStore((state) => state);
+  const [copiedCode, setCopiedCode] = useState("");
 
   useEffect(() => {
     loadHome();
   }, [loadHome]);
 
+  const copyCoupon = (code) => {
+    navigator.clipboard.writeText(code);
+    setCopiedCode(code);
+    toast.success(`Coupon code ${code} copied to clipboard!`);
+    setTimeout(() => setCopiedCode(""), 2500);
+  };
+
   if (loading) {
     return <CommonLoader />;
   }
 
-  const mainBanner = data.banners[0] || null;
-  const sideBanners = data.banners.slice(1, 3);
-
   return (
-    <div className={pageWrapClass}>
-      <div className={contentContainerClass}>
-        <div className={sectionStackClass}>
-          <section>
-            <div className={bannerGridClass}>
-              {mainBanner ? (
-                <Card className={bannerMainCardClass}>
-                  <img
-                    src={mainBanner.imageUrl}
-                    alt="Featured collection"
-                    className={bannerMainImageClass}
-                  />
-                </Card>
-              ) : null}
+    <div className="min-h-screen bg-background text-foreground antialiased pb-16">
+      {/* Auto-Scrollable Banner Carousel every 3 seconds (strictly matching reference layout) */}
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6">
+        <HomeBannerCarousel banners={data.banners || []} />
+      </section>
 
-              <div className={bannerSideGridClass}>
-                {sideBanners.map((item) => (
-                  <Card key={item._id} className={bannerSideCardClass}>
-                    <img
-                      src={item.imageUrl}
-                      alt="Featured collection"
-                      className={bannerSideImageClass}
-                    />
-                  </Card>
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+        <div className="space-y-14 sm:space-y-20">
+          {/* Handpicked / Recent Products Section (matches reference screenshot "HANDPICKED FOR YOU") */}
+          {!!data.recentProducts.length && (
+            <section>
+              <div className="mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-3 text-center sm:text-left">
+                <div className="space-y-1">
+                  <p className="text-xs font-semibold uppercase tracking-[0.25em] text-primary">
+                    Handpicked Selection
+                  </p>
+                  <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground uppercase">
+                    Handpicked For You
+                  </h2>
+                </div>
+
+                <Link to="/collections?sort=recent">
+                  <Button
+                    variant="ghost"
+                    className="text-xs uppercase tracking-wider font-semibold gap-1.5"
+                  >
+                    View All
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
+
+              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                {data.recentProducts.slice(0, 4).map((product) => (
+                  <CustomerProductCard key={product._id} product={product} />
                 ))}
               </div>
-            </div>
-          </section>
+            </section>
+          )}
 
+          {/* Categories Grid */}
           {!!data.categories.length && (
             <section>
-              <div className={sectionHeadClass}>
-                <p className={sectionEyebrowClass}>Categories</p>
-                <h2 className={sectionTitleClass}>Browse by collection</h2>
+              <div className="mb-6 space-y-1 text-center sm:text-left">
+                <p className="text-xs font-semibold uppercase tracking-[0.25em] text-primary">
+                  Collections
+                </p>
+                <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+                  Browse by Wardrobe Category
+                </h2>
               </div>
 
-              <div className={categoryGridClass}>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 {data.categories.slice(0, 4).map((categoryItem) => (
                   <Link
                     to={`/collections?category=${categoryItem._id}`}
                     key={categoryItem._id}
+                    className="group relative overflow-hidden rounded-2xl border border-border/40 bg-card p-6 transition-all duration-300 hover:border-primary/40 hover:shadow-md"
                   >
-                    <Card className={categoryCardClass}>
-                      <CardContent className={categoryContentClass}>
-                        <div className={categoryIconWrapClass}>
-                          <Grid2X2 className={categoryIconClass} />
-                        </div>
-
-                        <div className={categoryTextWrapClass}>
-                          <p className={categoryTitleClass}>
-                            {categoryItem.name}
-                          </p>
-                        </div>
-
-                        <span className={categoryLinkClass}>
-                          View Collection
-                          <ArrowRight className={categoryArrowIconClass} />
-                        </span>
-                      </CardContent>
-                    </Card>
+                    <div className="flex h-12 w-12 items-center justify-center rounded-sm bg-primary/5 text-primary mb-4 transition-transform duration-300 group-hover:scale-110">
+                      <Grid2X2 className="h-5 w-5" />
+                    </div>
+                    <h3 className="text-lg font-medium tracking-tight text-foreground mb-1">
+                      {categoryItem.name}
+                    </h3>
+                    <span className="inline-flex items-center gap-1.5 text-xs font-medium text-primary mt-2">
+                      View Collection
+                      <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+                    </span>
                   </Link>
                 ))}
               </div>
             </section>
           )}
 
+          {/* Exclusive Offers & Coupon Cards */}
           {!!data.coupons.length && (
-            <section>
-              <div className={sectionHeadClass}>
-                <p className={sectionEyebrowClass}>Offers</p>
-                <h2 className={sectionTitleClass}>Live Coupon Cards</h2>
+            <section className="rounded-2xl border border-border/50 bg-muted/20 p-6 sm:p-8">
+              <div className="mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.22em] text-primary">
+                    <Sparkles className="h-3.5 w-3.5" />
+                    Seasonal Perks
+                  </div>
+                  <h2 className="text-xl sm:text-2xl font-medium tracking-tight text-foreground">
+                    Available Promo Codes
+                  </h2>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Apply during checkout to redeem instant discounts
+                </p>
               </div>
 
-              <div className={couponGridClass}>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 {data.coupons.slice(0, 4).map((coupon) => (
-                  <Card key={coupon._id ?? coupon.code} className={couponCardClass}>
-                    <CardContent className={couponContentClass}>
-                      <div className={couponIconWrapClass}>
-                        <TicketPercent className={couponIconClass} />
-                      </div>
-
-                      <Badge className={couponBadgeClass}>
+                  <div
+                    key={coupon._id ?? coupon.code}
+                    className="relative flex flex-col justify-between rounded-2xl border border-dashed border-primary/30 bg-card p-4 transition-all duration-300 hover:border-primary/60"
+                  >
+                    <div className="flex items-start justify-between gap-2 mb-3">
+                      <Badge className="bg-primary/10 text-primary border-primary/20 text-xs font-semibold">
                         {coupon.percentage}% OFF
                       </Badge>
+                      <Tag className="h-4 w-4 text-muted-foreground" />
+                    </div>
 
-                      <div className={couponCodeWrapClass}>
-                        <p className={couponCodeLabelClass}>Coupon Code</p>
-                        <p className={couponCodeClass}>{coupon.code}</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </section>
-          )}
+                    <div className="space-y-1 mb-4">
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                        Code
+                      </p>
+                      <p className="font-mono text-base font-bold tracking-widest text-foreground">
+                        {coupon.code}
+                      </p>
+                      {coupon.minimumOrderValue > 0 && (
+                        <p className="text-[11px] text-muted-foreground">
+                          Orders above ₹{coupon.minimumOrderValue}
+                        </p>
+                      )}
+                    </div>
 
-          {!!data.recentProducts.length && (
-            <section>
-              <div className={sectionHeadClass}>
-                <p className={sectionEyebrowClass}>Latest</p>
-                <h2 className={sectionTitleClass}>Recent Products</h2>
-              </div>
-
-              <div className={productGridClass}>
-                {data.recentProducts.slice(0, 4).map((product) => (
-                  <Link
-                    to={`/collection/${product._id}`}
-                    key={product._id}
-                  >
-                    <Card className={productCardClass}>
-                      <CardContent className={productContentClass}>
-                        <div className={productImageWrapClass}>
-                          <img
-                            src={product.image}
-                            alt={product.title}
-                            className={productImageClass}
-                          />
-                        </div>
-
-                        <div className={productInfoWrapClass}>
-                          <div className={productBrandRowClass}>
-                            <p className={productBrandClass}>
-                              {product.brand}
-                            </p>
-                          </div>
-
-                          <p className={productTitleClass}>
-                            {product.title}
-                          </p>
-                        </div>
-
-                        <div className={productPriceRowClass}>
-                          <div>
-                            <p className={productPriceClass}>
-                              {formatPrice(product.finalPrice)}
-                            </p>
-
-                            {product.salePercentage > 0 && (
-                              <p className={productOriginalPriceClass}>
-                                {formatPrice(product.price)}
-                              </p>
-                            )}
-                          </div>
-
-                          <span className={productViewClass}>View</span>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => copyCoupon(coupon.code)}
+                      className="w-full rounded-lg h-8 text-xs font-medium gap-1.5"
+                    >
+                      {copiedCode === coupon.code ? (
+                        <>
+                          <Check className="h-3.5 w-3.5 text-emerald-500" />
+                          Copied
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="h-3.5 w-3.5" />
+                          Copy Code
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 ))}
               </div>
             </section>

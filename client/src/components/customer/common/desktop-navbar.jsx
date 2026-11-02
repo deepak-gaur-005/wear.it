@@ -1,5 +1,5 @@
 import { useAuth } from "@clerk/react";
-import { ShoppingBag, Heart, User, LogIn, LogOut, ShoppingCart, ShoppingBasket, Search } from "lucide-react";
+import { ShoppingBag, Heart, User, LogOut, ShoppingCart, ShoppingBasket, Search, Truck } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -12,65 +12,22 @@ import { useCustomerProfileStore } from "@/features/customer/profile/store";
 import { useCustomerOrdersStore } from "@/features/customer/orders/store";
 import { useCustomerCartAndCheckoutStore } from "@/features/customer/cart-and-ckeckout/store";
 
-const collectionsPage = {
-  label: "Collections",
-  href: "/collections",
-  icon: ShoppingBag,
-};
-
-
 const shell =
-  "mx-auto flex h-[72px] max-w-[1600px] items-center gap-3 px-4 sm:px-6 lg:px-8";
+  "mx-auto flex h-[68px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8";
 
 const headerClass =
-  "sticky top-0 z-50 border-b border-border/70 bg-secondary/60 backdrop-blur-xl";
+  "sticky top-0 z-50 border-b border-border/60 bg-background/90 backdrop-blur-xl";
 
-const textLink =
-  "inline-flex h-10 items-center gap-2 rounded-xl px-3 text-[15px] font-medium text-foreground/90 transition hover:bg-white/5 hover:text-foreground";
+const navLinkClass =
+  "inline-flex h-9 items-center rounded-lg px-3.5 text-sm font-semibold tracking-wide text-foreground/80 transition-colors hover:bg-muted/50 hover:text-foreground";
 
-const iconLink =
-  "relative inline-flex h-10 w-10 items-center justify-center rounded-xl text-foreground/90 transition hover:bg-white/5 hover:text-foreground";
+const iconButtonClass =
+  "relative inline-flex h-9 w-9 items-center justify-center rounded-full text-foreground/80 transition hover:bg-muted/60 hover:text-foreground";
 
-const brandWrap =
-  "flex shrink-0 items-center gap-3";
+const badgeClass =
+  "absolute -right-1 -top-1 inline-flex min-w-4.5 h-4.5 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold leading-none text-primary-foreground";
 
-const brandTitle =
-  "text-[25px] font-semibold tracking-[-0.02em] text-foreground";
-
-const desktopCollectionsWrap =
-  "ml-6 hidden lg:block";
-
-const desktopNav =
-  "ml-auto hidden items-center gap-1 lg:flex";
-
-const dropdownButton =
-  "h-10 rounded-xl px-3 text-[15px] font-medium text-foreground/90 hover:bg-white/5 hover:text-foreground";
-
-const dropdownContent =
-  "mt-3 rounded-2xl border-border bg-popover/95 p-2 backdrop-blur";
-
-const accountDropdownContent =
-  `${dropdownContent} w-56`;
-
-const dropdownItemLink =
-  "flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5";
-
-const cartBadge =
-  "absolute -right-1 -top-1 inline-flex min-w-5 items-center justify-center rounded-full bg-amber-400 px-1.5 text-[11px] font-semibold leading-5 text-black";
-
-const wishlistBadge =
-  "absolute -right-1 -top-1 inline-flex min-w-5 items-center justify-center rounded-full bg-amber-400 px-1.5 text-[11px] font-semibold leading-5 text-black";
-
-function NavTextLink({ href, label, icon: Icon }) {
-  return (
-    <Link to={href} className={textLink}>
-        <Icon className="h-4.5 w-4.5" />
-        <span>{label}</span>
-    </Link>
-  );
-}
-
-export function CustomerNavbar () {
+export function CustomerNavbar() {
   const { isSignedIn, signOut, isLoaded } = useAuth();
   const { isBootstrapped } = useAuthStore();
 
@@ -88,7 +45,9 @@ export function CustomerNavbar () {
     (state) => state,
   );
 
-  const { setOpen, cart, loadCart } = useCustomerCartAndCheckoutStore( (state) => state );
+  const { setOpen, cart, loadCart } = useCustomerCartAndCheckoutStore(
+    (state) => state,
+  );
   const [navSearch, setNavSearch] = useState("");
   const navigate = useNavigate();
 
@@ -101,8 +60,7 @@ export function CustomerNavbar () {
   };
 
   useEffect(() => {
-
-    if( !isLoaded || !isBootstrapped) return;
+    if (!isLoaded || !isBootstrapped) return;
 
     void loadCart(Boolean(isSignedIn));
 
@@ -122,129 +80,171 @@ export function CustomerNavbar () {
     isSignedIn,
     loadWishlist,
     loadCart,
-  ])
+  ]);
 
   const wishlistCount = wishlistItems.length;
+  const cartCount = cart?.totalQuantity ?? 0;
 
   return (
     <header className={headerClass}>
+      {/* Top Announcement Bar */}
+      <div className="w-full bg-muted/20 py-1.5 text-xs font-medium text-foreground">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+          <div className="hidden sm:block w-16" />
+          <div className="flex items-center justify-center gap-2 mx-auto text-xs">
+            <Truck className="h-3.5 w-3.5 text-primary shrink-0" />
+            <span>Free Shipping on all orders over ₹999</span>
+          </div>
+          <div className="hidden sm:flex items-center gap-1 text-muted-foreground text-[11px] font-mono">
+            <span>INR ₹</span>
+          </div>
+        </div>
+      </div>
 
       <div className={shell}>
+        {/* Left Section: Brand name wear.it + Collections + New Arrivals */}
+        <div className="flex items-center gap-6 lg:gap-8">
+          {/* Brand */}
+          <Link to="/" className="flex shrink-0 items-center gap-2 group">
+            <div className="flex h-8.5 w-8.5 items-center justify-center rounded-xl bg-white text-black border border-black/15 dark:bg-black dark:text-white dark:border-white/20 transition-transform group-hover:scale-105 shadow-xs">
+              <ShoppingBag className="h-4.5 w-4.5" />
+            </div>
+            <span className="text-2xl font-bold tracking-tight text-foreground">
+              wear.it
+            </span>
+          </Link>
 
-        {/* Brand */}
-        <Link to="/" className={brandWrap}>
-          <ShoppingBag className="h-10 w-10" />
-          <span className={brandTitle}>wear.it</span>
-        </Link>
-
-        {/*collection*/}
-
-        <div className={desktopCollectionsWrap}>
-          <NavTextLink
-            href={collectionsPage.href}
-            label={collectionsPage.label}
-            icon={collectionsPage.icon}
-          />
+          {/* Left Navigation Links */}
+          <nav className="hidden md:flex items-center gap-1">
+            <Link to="/collections" className={navLinkClass}>
+              Collections
+            </Link>
+            <Link to="/collections?sort=recent" className={navLinkClass}>
+              New Arrivals
+            </Link>
+          </nav>
         </div>
 
-        {/* Global Search Bar */}
-        <form onSubmit={handleNavSearch} className="relative hidden md:flex items-center ml-2">
-          <Search className="absolute left-3 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
-          <input
-            type="text"
-            placeholder="Search products, brands..."
-            value={navSearch}
-            onChange={(e) => setNavSearch(e.target.value)}
-            className="h-9 w-48 lg:w-64 rounded-full border border-border/80 bg-background/80 pl-8.5 pr-3 text-xs placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-all duration-200"
-          />
-        </form>
+        {/* Right Section: Search, Wishlist, Account, Cart */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Search Bar */}
+          <form
+            onSubmit={handleNavSearch}
+            className="relative hidden sm:flex items-center"
+          >
+            <Search className="absolute left-3.5 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+            <input
+              type="text"
+              placeholder="Search products, brands..."
+              value={navSearch}
+              onChange={(e) => setNavSearch(e.target.value)}
+              className="h-9 w-40 md:w-52 lg:w-64 rounded-full border border-border/80 bg-background/80 pl-9 pr-3 text-xs placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-all duration-200"
+            />
+          </form>
 
-        {/* Desktop navigation */}
-        <nav className={desktopNav}>
-          {isSignedIn ? (
-            <button
-              type="button"
-              className={iconLink}
-              onClick={() => setWishListOpen(true)}
-            >
-              <Heart className="h-4.5 w-4.5" />
-              <span className={wishlistBadge}>{wishlistCount}</span>
-            </button>
+          {/* Wishlist Icon */}
+          <button
+            type="button"
+            onClick={() => {
+              if (!isSignedIn) {
+                navigate("/sign-in");
+              } else {
+                setWishListOpen(true);
+              }
+            }}
+            aria-label={`Wishlist, ${wishlistCount} items`}
+            className={iconButtonClass}
+          >
+            <Heart className="h-4.5 w-4.5" />
+            {wishlistCount > 0 && (
+              <span className={badgeClass}>{wishlistCount}</span>
+            )}
+          </button>
 
-          ) : null}
-
-          {/*Account*/}
+          {/* Account */}
           {isSignedIn ? (
             <DropdownMenu>
               <DropdownMenuTrigger
                 render={
-                  <Button variant="ghost" className={dropdownButton} />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-9 gap-1.5 rounded-full px-2.5 text-xs font-medium text-foreground hover:bg-muted/60"
+                  >
+                    <User className="h-4 w-4" />
+                    <span className="hidden lg:inline">Account</span>
+                  </Button>
                 }
-              >
-                <User className="h-4.5 w-4.5" />
-                Account
-              </DropdownMenuTrigger>
+              />
 
               <DropdownMenuContent
-              align="start"
-              className={accountDropdownContent}
+                align="end"
+                className="w-52 rounded-xl border-border bg-popover/95 p-1.5 shadow-lg backdrop-blur"
               >
                 <DropdownMenuItem
                   onClick={() => void openProfile()}
-                  className={dropdownItemLink}
+                  className="flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium"
                 >
-                  <User className="h-4 w-4"/>
-                  <span>My Account</span>
+                  <User className="h-4 w-4" />
+                  <span>My Profile</span>
                 </DropdownMenuItem>
 
                 <DropdownMenuItem
                   onClick={() => void openOrders()}
-                  className={dropdownItemLink}
+                  className="flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium"
                 >
-                    <ShoppingBasket className="h-4 w-4"/>
-                    <span> My Orders </span>
+                  <ShoppingBasket className="h-4 w-4" />
+                  <span>My Orders</span>
                 </DropdownMenuItem>
 
                 <DropdownMenuItem
                   onClick={() => void signOut()}
-                  className={dropdownItemLink}
+                  className="flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-destructive focus:text-destructive"
                 >
-                  <LogOut className="h-4 w-4"/>
+                  <LogOut className="h-4 w-4" />
                   <span>Logout</span>
                 </DropdownMenuItem>
-
               </DropdownMenuContent>
             </DropdownMenu>
-          ) : ( 
-            <NavTextLink
-              href="/sign-in"
-              label="Login"
-              icon={LogIn}
-            />   
+          ) : (
+            <Link
+              to="/sign-in"
+              className="inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-xs font-medium text-foreground transition hover:bg-muted/60"
+            >
+              <User className="h-4 w-4" />
+              <span className="hidden sm:inline">Sign In</span>
+            </Link>
           )}
 
-          {/*Cart*/}
+          {/* Cart Icon */}
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className={iconLink}
-            aria-label={`Open cart, ${cart?.totalQuantity ?? 0} items`}
+            className={iconButtonClass}
+            aria-label={`Open cart, ${cartCount} items`}
           >
             <ShoppingCart className="h-4.5 w-4.5" />
-            <span className={cartBadge}>{cart?.totalQuantity ?? 0}</span>
+            {cartCount > 0 && <span className={badgeClass}>{cartCount}</span>}
           </button>
 
-        </nav>
-
-        <CustomerMobileNavbar
-          isSignedIn={Boolean(isSignedIn)}
-          onSignOut={signOut}
-          onCartOpen={() => setOpen(true)}
-          cartCount={cart?.totalQuantity ?? 0}
-          onProfileOpen={openProfile}
-          onOrdersOpen={openOrders}
-        />
-
+          {/* Mobile Menu trigger */}
+          <CustomerMobileNavbar
+            isSignedIn={Boolean(isSignedIn)}
+            onSignOut={signOut}
+            onCartOpen={() => setOpen(true)}
+            cartCount={cartCount}
+            onProfileOpen={openProfile}
+            onOrdersOpen={openOrders}
+            onWishlistOpen={() => {
+              if (!isSignedIn) {
+                navigate("/sign-in");
+              } else {
+                setWishListOpen(true);
+              }
+            }}
+            wishlistCount={wishlistCount}
+          />
+        </div>
       </div>
     </header>
   );

@@ -8,6 +8,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import {
+  Flame,
   Heart,
   LogIn,
   LogOut,
@@ -16,48 +17,54 @@ import {
   ShoppingBag,
   ShoppingBasket,
   ShoppingCart,
-  Store,
   User,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 
-const collectionsPage = {
-  label: "Collections",
-  href: "/collections",
-  icon: ShoppingBag,
-};
+const collectionsPages = [
+  {
+    label: "All Collections",
+    href: "/collections",
+    icon: ShoppingBag,
+  },
+  {
+    label: "New Arrivals",
+    href: "/collections?sort=recent",
+    icon: Flame,
+  },
+];
 
 const iconLink =
-  "relative inline-flex h-10 w-10 items-center justify-center rounded-xl text-foreground/90 transition hover:bg-white/5 hover:text-foreground";
+  "relative inline-flex h-9 w-9 items-center justify-center rounded-full text-foreground/80 transition hover:bg-muted/60 hover:text-foreground";
 
-const mobileWrap = "ml-auto flex items-center gap-1 lg:hidden";
+const mobileWrap = "flex items-center gap-1 md:hidden";
 
 const menuButton =
-  "h-11 w-11 rounded-xl border border-white/10 bg-white/5 text-foreground hover:bg-white/10";
+  "h-9 w-9 rounded-full text-foreground hover:bg-muted/60";
 
 const sheetContent =
-  "w-[380px] max-w-[92vw] border-r border-border bg-background p-0 sm:w-[460px]";
+  "w-[340px] max-w-[88vw] border-r border-border bg-background p-0";
 
-const brandWrap = "flex items-center gap-3";
+const brandWrap = "flex items-center gap-2.5";
 
 const brandTitle =
-  "text-[25px] font-semibold tracking-[-0.02em] text-foreground";
+  "text-2xl font-bold tracking-tight text-foreground";
 
-const brandBlock = "px-5 py-6 sm:px-6";
+const brandBlock = "px-5 py-5 sm:px-6";
 
-const drawerSection = "space-y-3 px-5 py-5 sm:px-6";
+const drawerSection = "space-y-2 px-5 py-4 sm:px-6";
 
 const drawerTitle =
-  "text-sm font-semibold tracking-wide text-muted-foreground";
+  "text-xs font-semibold uppercase tracking-wider text-muted-foreground";
 
 const drawerItemsWrap = "space-y-1";
 
 const drawerItemLink =
-  "flex items-center gap-3 rounded-xl px-2 py-3 text-[18px] font-medium text-foreground transition hover:bg-white/5";
+  "flex items-center gap-3 rounded-xl px-2.5 py-2.5 text-sm font-medium text-foreground transition hover:bg-muted/60";
 
 const cartBadge =
-  "absolute -right-1 -top-1 inline-flex min-w-5 items-center justify-center rounded-full bg-amber-400 px-1.5 text-[11px] font-semibold leading-5 text-black";
+  "absolute -right-1 -top-1 inline-flex min-w-4.5 h-4.5 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold leading-none text-primary-foreground";
 
 function DrawerSection({ title, items }) {
   return (
@@ -68,27 +75,25 @@ function DrawerSection({ title, items }) {
         {items.map((item) => {
           const Icon = item.icon;
 
-          return (
-            item.onClick ? (
-              <button
-                key={item.label}
-                type="button"
-                onClick={item.onClick}
-                className={drawerItemLink}
-              >
-                <Icon className="h-4.5 w-4.5" />
-                <span>{item.label}</span>
-              </button>
-            ) : (
-              <Link
-                key={item.label}
-                to={item.href}
-                className={drawerItemLink}
-              >
-                <Icon className="h-4.5 w-4.5" />
-                <span>{item.label}</span>
-              </Link>
-            )
+          return item.onClick ? (
+            <button
+              key={item.label}
+              type="button"
+              onClick={item.onClick}
+              className={drawerItemLink}
+            >
+              <Icon className="h-4.5 w-4.5 text-muted-foreground" />
+              <span>{item.label}</span>
+            </button>
+          ) : (
+            <Link
+              key={item.label}
+              to={item.href}
+              className={drawerItemLink}
+            >
+              <Icon className="h-4.5 w-4.5 text-muted-foreground" />
+              <span>{item.label}</span>
+            </Link>
           );
         })}
       </div>
@@ -103,6 +108,8 @@ export function CustomerMobileNavbar({
   cartCount,
   onProfileOpen,
   onOrdersOpen,
+  onWishlistOpen,
+  wishlistCount,
 }) {
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [mobileSearch, setMobileSearch] = useState("");
@@ -116,10 +123,11 @@ export function CustomerMobileNavbar({
       setMenuOpen(false);
     }
   };
+
   const mobileAccountItems = isSignedIn
     ? [
         {
-          label: "My Account",
+          label: "My Profile",
           icon: User,
           onClick: () => {
             onProfileOpen();
@@ -135,15 +143,11 @@ export function CustomerMobileNavbar({
           },
         },
         {
-          label: "Wishlist",
+          label: `Wishlist (${wishlistCount})`,
           icon: Heart,
           onClick: () => {
             setMenuOpen(false);
-            // Open the wishlist dialog via its store (matches desktop behaviour).
-            import("@/features/customer/wishlist/store").then(
-              ({ useCustomerWishlistStore }) =>
-                useCustomerWishlistStore.getState().setOpen(true),
-            );
+            if (onWishlistOpen) onWishlistOpen();
           },
         },
         {
@@ -157,7 +161,7 @@ export function CustomerMobileNavbar({
       ]
     : [
         {
-          label: "Login",
+          label: "Sign In",
           href: "/sign-in",
           icon: LogIn,
         },
@@ -172,7 +176,7 @@ export function CustomerMobileNavbar({
         aria-label={`Open cart, ${cartCount} items`}
       >
         <ShoppingCart className="h-4.5 w-4.5" />
-        <span className={cartBadge}>{cartCount}</span>
+        {cartCount > 0 && <span className={cartBadge}>{cartCount}</span>}
       </button>
 
       <Sheet open={isMenuOpen} onOpenChange={setMenuOpen}>
@@ -184,45 +188,45 @@ export function CustomerMobileNavbar({
           <Menu className="h-5 w-5" />
         </SheetTrigger>
 
-        <SheetContent
-          side="left"
-          className={sheetContent}
-        >
+        <SheetContent side="left" className={sheetContent}>
           <SheetHeader className="sr-only">
-            <SheetTitle>Menu</SheetTitle>
+            <SheetTitle>Navigation Menu</SheetTitle>
           </SheetHeader>
 
           <div className={brandBlock}>
-            <Link to="/" className={brandWrap} onClick={() => setMenuOpen(false)}>
-              <Store className="h-10 w-10" />
+            <Link
+              to="/"
+              className={brandWrap}
+              onClick={() => setMenuOpen(false)}
+            >
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-white text-black border border-black/15 dark:bg-black dark:text-white dark:border-white/20 shadow-xs">
+                <ShoppingBag className="h-4 w-4" />
+              </div>
               <span className={brandTitle}>wear.it</span>
             </Link>
 
-            <form onSubmit={handleMobileSearch} className="relative mt-4 flex items-center">
+            <form
+              onSubmit={handleMobileSearch}
+              className="relative mt-4 flex items-center"
+            >
               <Search className="absolute left-3 h-4 w-4 text-muted-foreground pointer-events-none" />
               <input
                 type="text"
-                placeholder="Search collections..."
+                placeholder="Search collections, products..."
                 value={mobileSearch}
                 onChange={(e) => setMobileSearch(e.target.value)}
-                className="h-10 w-full rounded-lg border border-border bg-secondary/40 pl-9 pr-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                className="h-9 w-full rounded-full border border-border bg-muted/40 pl-9 pr-3 text-xs placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
               />
             </form>
           </div>
 
           <Separator />
 
-          <DrawerSection
-            title="Collections"
-            items={[collectionsPage]}
-          />
+          <DrawerSection title="Shop" items={collectionsPages} />
 
           <Separator />
 
-          <DrawerSection
-            title="Account"
-            items={mobileAccountItems}
-          />
+          <DrawerSection title="Account" items={mobileAccountItems} />
         </SheetContent>
       </Sheet>
     </div>

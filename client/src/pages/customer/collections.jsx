@@ -13,9 +13,9 @@ import { useState } from "react";
 
 const pageWrapClass = "min-h-screen bg-background";
 
-const heroSectionClass = "border-b border-border/60 bg-gradient-to-b from-primary/10 via-background to-background";
+const heroSectionClass = "bg-gradient-to-b from-primary/10 via-background to-background";
 
-const heroContainerClass = "mx-auto max-w-7xl px-4 py-8 sm:py-10";
+const heroContainerClass = "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 sm:py-10";
 
 const heroEyebrowClass = "text-sm uppercase tracking-[0.2em] text-primary";
 
@@ -27,9 +27,9 @@ const heroTitleClass = "text-3xl font-semibold tracking-tight text-foreground md
 
 const sortWrapClass = "flex items-center gap-3 text-sm text-muted-foreground";
 
-const sortTriggerClass = "w-[180px] rounded-none bg-card";
+const sortTriggerClass = "w-[180px] rounded-xl bg-card";
 
-const contentContainerClass = "mx-auto max-w-7xl px-4 py-6";
+const contentContainerClass = "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6";
 
 const topBarClass = "mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between";
 
@@ -39,7 +39,7 @@ const activeBadgeClass = "border-border bg-secondary text-secondary-foreground h
 
 const topBarActionsClass = "flex items-center gap-3";
 
-const mobileFilterButtonClass = "rounded-none lg:hidden";
+const mobileFilterButtonClass = "rounded-xl lg:hidden";
 
 const mobileFilterIconClass = "mr-2 h-4 w-4";
 
@@ -55,7 +55,7 @@ const desktopFilterCardClass = "sticky top-24 border-border/60 bg-card/80 p-5";
 
 const productSectionClass = "space-y-6";
 
-const actionButtonClass = "rounded-none";
+const actionButtonClass = "rounded-xl";
 
 const emptyCardClass = "border-border/60 bg-card/80";
 
@@ -125,7 +125,7 @@ function Collections() {
                   placeholder="Search collections..."
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
-                  className="pl-9 pr-8 h-9 w-[220px] sm:w-[260px] rounded-none bg-card text-xs sm:text-sm"
+                  className="pl-9 pr-8 h-9 w-[220px] sm:w-[260px] rounded-full bg-card text-xs sm:text-sm"
                 />
                 {searchInput ? (
                   <button
