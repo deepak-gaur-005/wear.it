@@ -108,7 +108,6 @@ wear.it/
 │   ├── .env.example                      # Backend environment template
 │   └── package.json
 │
-├── LICENSE                               # MIT License
 └── README.md
 ```
 
@@ -188,9 +187,3 @@ VITE_BACKEND_URL=http://localhost:5000
 | `server/` | `npm run dev` | Start backend with Nodemon auto-reload |
 | `server/` | `npm start` | Start backend in production |
 
----
-
-## 📄 License
-
-Distributed under the [MIT](LICENSE) License.  
-Created with dedication by **[Deepak Gaur](mailto:deepakguar111@gmail.com)**.
