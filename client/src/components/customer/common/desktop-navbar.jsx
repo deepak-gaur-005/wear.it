@@ -1,5 +1,5 @@
 import { useAuth } from "@clerk/react";
-import { ShoppingBag, Heart, User, LogOut, ShoppingCart, ShoppingBasket, Search, Truck } from "lucide-react";
+import { ShoppingBag, Heart, User, LogOut, ShoppingCart, ShoppingBasket, Search, Truck, ShieldCheck } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -29,7 +29,8 @@ const badgeClass =
 
 export function CustomerNavbar() {
   const { isSignedIn, signOut, isLoaded } = useAuth();
-  const { isBootstrapped } = useAuthStore();
+  const { isBootstrapped, user } = useAuthStore();
+  const isAdmin = Boolean(isSignedIn && user?.role === "admin");
 
   const {
     items: wishlistItems,
@@ -142,6 +143,18 @@ export function CustomerNavbar() {
             />
           </form>
 
+          {/* Admin Dashboard Button (Only visible to verified admins) */}
+          {isAdmin && (
+            <Link
+              to="/admin"
+              className="inline-flex h-9 items-center gap-1.5 rounded-full bg-primary/10 px-3.5 text-xs font-semibold text-primary border border-primary/20 hover:bg-primary hover:text-primary-foreground transition-all duration-200"
+              title="Open Admin Dashboard"
+            >
+              <ShieldCheck className="h-4 w-4" />
+              <span>Admin</span>
+            </Link>
+          )}
+
           {/* Wishlist Icon */}
           <button
             type="button"
@@ -181,6 +194,16 @@ export function CustomerNavbar() {
                 align="end"
                 className="w-52 rounded-xl border-border bg-popover/95 p-1.5 shadow-lg backdrop-blur"
               >
+                {isAdmin && (
+                  <DropdownMenuItem
+                    onClick={() => navigate("/admin")}
+                    className="flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold text-primary focus:bg-primary/10 focus:text-primary"
+                  >
+                    <ShieldCheck className="h-4 w-4 text-primary" />
+                    <span>Admin Dashboard</span>
+                  </DropdownMenuItem>
+                )}
+
                 <DropdownMenuItem
                   onClick={() => void openProfile()}
                   className="flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium"
@@ -230,6 +253,7 @@ export function CustomerNavbar() {
           {/* Mobile Menu trigger */}
           <CustomerMobileNavbar
             isSignedIn={Boolean(isSignedIn)}
+            isAdmin={isAdmin}
             onSignOut={signOut}
             onCartOpen={() => setOpen(true)}
             cartCount={cartCount}

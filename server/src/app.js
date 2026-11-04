@@ -29,11 +29,21 @@ import { adminReviewRouter } from "./routes/admin/review.routes.js";
 
 const app = express();
 
+const configuredOrigins = process.env.CORS_ORIGINS
+    ? process.env.CORS_ORIGINS.split(",").map((originItem) => originItem.trim())
+    : ["http://localhost:5173", "http://localhost:5174"];
+
 app.use(
     cors({
-        origin: process.env.CORS_ORIGINS
-            ? process.env.CORS_ORIGINS.split(",")
-            : "http://localhost:5173",
+        origin: (origin, callback) => {
+            if (!origin) return callback(null, true);
+            if (configuredOrigins.includes(origin)) return callback(null, true);
+            // Allow localhost or 127.0.0.1 on any port during local development
+            if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+                return callback(null, true);
+            }
+            callback(new Error(`CORS origin not allowed: ${origin}`));
+        },
         credentials: true
     })
 );

@@ -14,6 +14,7 @@ const DEFAULT_EDITORIAL_SLIDES = [
     ctaText: "Explore Collections",
     ctaLink: "/collections",
     badge: "New Season",
+    isCustom: false,
   },
   {
     id: "editorial-2",
@@ -25,6 +26,7 @@ const DEFAULT_EDITORIAL_SLIDES = [
     ctaText: "Shop New Arrivals",
     ctaLink: "/collections?sort=recent",
     badge: "Trending Now",
+    isCustom: false,
   },
   {
     id: "editorial-3",
@@ -36,35 +38,21 @@ const DEFAULT_EDITORIAL_SLIDES = [
     ctaText: "Discover Now",
     ctaLink: "/collections",
     badge: "Limited Edition",
+    isCustom: false,
   },
 ];
 
 export function HomeBannerCarousel({ banners = [] }) {
-  // Merge uploaded banners from admin with editorial fallbacks so there are always at least 3 slides
-  const slides = banners.length >= 3
-    ? banners.map((b, i) => ({
-        id: b._id || `banner-${i}`,
-        imageUrl: b.imageUrl,
-        eyebrow: "Featured Collection",
-        title: "Curated Fashion Edit",
-        subtitle: "Discover high quality fabrics and contemporary wardrobe essentials.",
-        ctaText: "Shop Collection",
-        ctaLink: "/collections",
-        badge: "Featured",
-      }))
-    : [
-        ...banners.map((b, i) => ({
+  // Use uploaded banners from admin; if none exist, show fallback editorial slides
+  const slides =
+    banners && banners.length > 0
+      ? banners.map((b, i) => ({
           id: b._id || `banner-${i}`,
           imageUrl: b.imageUrl,
-          eyebrow: "Special Collection",
-          title: "Modern Contemporary Lookbook",
-          subtitle: "Discover elevated silhouettes crafted for modern dressing.",
-          ctaText: "Shop Now",
           ctaLink: "/collections",
-          badge: "Editor's Pick",
-        })),
-        ...DEFAULT_EDITORIAL_SLIDES.slice(banners.length),
-      ];
+          isCustom: true,
+        }))
+      : DEFAULT_EDITORIAL_SLIDES;
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -81,13 +69,13 @@ export function HomeBannerCarousel({ banners = [] }) {
     setCurrentIndex((prev) => (prev - 1 + totalSlides) % totalSlides);
   }, [totalSlides]);
 
-  // Auto-scroll every 3 seconds (3000ms)
+  // Auto-scroll every 3.5 seconds when there are multiple slides
   useEffect(() => {
     if (isPaused || totalSlides <= 1) return;
 
     const timer = setInterval(() => {
       nextSlide();
-    }, 3000);
+    }, 3500);
 
     return () => clearInterval(timer);
   }, [nextSlide, isPaused, totalSlides, currentIndex]);
@@ -115,7 +103,7 @@ export function HomeBannerCarousel({ banners = [] }) {
 
   return (
     <div
-      className="relative w-full overflow-hidden rounded-2xl group shadow-sm bg-neutral-900"
+      className="relative w-full overflow-hidden rounded-2xl group shadow-sm bg-neutral-100 dark:bg-neutral-900 border border-neutral-200/60 dark:border-neutral-800"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       onTouchStart={handleTouchStart}
@@ -134,95 +122,119 @@ export function HomeBannerCarousel({ banners = [] }) {
             key={slide.id || index}
             className="relative w-full h-full shrink-0 overflow-hidden"
           >
-            {/* Background Image */}
-            <img
-              src={slide.imageUrl}
-              alt={slide.title}
-              className="h-full w-full object-cover object-center brightness-[0.88] transition-transform duration-1000 group-hover:scale-102"
-              loading={index === 0 ? "eager" : "lazy"}
-            />
+            {slide.isCustom ? (
+              /* Custom Admin Banner - 100% clear, natural colors, no dark shadows, fully clickable */
+              <Link
+                to={slide.ctaLink || "/collections"}
+                className="block w-full h-full focus:outline-none"
+                aria-label="View promotional collection"
+              >
+                <img
+                  src={slide.imageUrl}
+                  alt="Promotional banner"
+                  className="h-full w-full object-cover object-center transition-transform duration-700 group-hover:scale-101"
+                  loading={index === 0 ? "eager" : "lazy"}
+                />
+              </Link>
+            ) : (
+              /* Default Editorial Fallback Slide */
+              <>
+                <img
+                  src={slide.imageUrl}
+                  alt={slide.title || "Collection banner"}
+                  className="h-full w-full object-cover object-center transition-transform duration-700 group-hover:scale-101"
+                  loading={index === 0 ? "eager" : "lazy"}
+                />
 
-            {/* Subtle Gradient Overlays for contrast */}
-            <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/35 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
+                {/* Soft gradient restricted to bottom-left text container only (center & top stay clear) */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
 
-            {/* Slide Text Content */}
-            <div className="absolute inset-0 flex flex-col justify-end p-6 sm:p-10 md:p-14 lg:p-16 text-white max-w-2xl">
-              {slide.badge && (
-                <div className="mb-3 flex items-center gap-2">
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 backdrop-blur-md px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-white border border-white/30">
-                    <Sparkles className="h-3 w-3 text-amber-300" />
-                    {slide.badge}
-                  </span>
-                  <span className="text-xs uppercase tracking-[0.2em] text-white/80 font-medium">
-                    {slide.eyebrow}
-                  </span>
+                <div className="absolute inset-0 flex flex-col justify-end p-6 sm:p-10 md:p-14 lg:p-16 text-white max-w-2xl">
+                  {slide.badge && (
+                    <div className="mb-3 flex items-center gap-2">
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 backdrop-blur-md px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-white border border-white/30">
+                        <Sparkles className="h-3 w-3 text-amber-300" />
+                        {slide.badge}
+                      </span>
+                      <span className="text-xs uppercase tracking-[0.2em] text-white/90 font-medium">
+                        {slide.eyebrow}
+                      </span>
+                    </div>
+                  )}
+
+                  <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white leading-[1.15] mb-3 drop-shadow-md">
+                    {slide.title}
+                  </h2>
+
+                  <p className="text-xs sm:text-sm md:text-base text-white/90 line-clamp-2 mb-6 max-w-lg leading-relaxed drop-shadow-sm">
+                    {slide.subtitle}
+                  </p>
+
+                  <div>
+                    <Link to={slide.ctaLink}>
+                      <Button
+                        size="lg"
+                        className="h-10 sm:h-11 rounded-xl bg-white text-black hover:bg-white/90 text-xs sm:text-sm font-semibold uppercase tracking-wider px-6 gap-2 shadow-lg transition-transform active:scale-95"
+                      >
+                        <span>{slide.ctaText}</span>
+                        <ArrowRight className="h-4 w-4" />
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
-              )}
-
-              <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white leading-[1.15] mb-3">
-                {slide.title}
-              </h2>
-
-              <p className="text-xs sm:text-sm md:text-base text-white/85 line-clamp-2 mb-6 max-w-lg leading-relaxed">
-                {slide.subtitle}
-              </p>
-
-              <div>
-                <Link to={slide.ctaLink}>
-                  <Button
-                    size="lg"
-                    className="h-10 sm:h-11 rounded-xl bg-white text-black hover:bg-white/90 text-xs sm:text-sm font-semibold uppercase tracking-wider px-6 gap-2 shadow-lg transition-transform active:scale-95"
-                  >
-                    <span>{slide.ctaText}</span>
-                    <ArrowRight className="h-4 w-4" />
-                  </Button>
-                </Link>
-              </div>
-            </div>
+              </>
+            )}
           </div>
         ))}
       </div>
 
-      {/* Navigation Arrows (matching reference screenshot left and right arrows) */}
-      <button
-        type="button"
-        onClick={prevSlide}
-        aria-label="Previous slide"
-        className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full bg-black/40 hover:bg-black/70 text-white backdrop-blur-md border border-white/20 transition-all duration-200 opacity-80 hover:opacity-100 hover:scale-105 active:scale-95 z-10"
-      >
-        <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" />
-      </button>
+      {/* Navigation Arrows - only displayed when multiple slides exist, styled with clean frosted glass */}
+      {totalSlides > 1 && (
+        <>
+          <button
+            type="button"
+            onClick={prevSlide}
+            aria-label="Previous slide"
+            className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full bg-white/80 hover:bg-white text-neutral-900 dark:bg-black/60 dark:text-white dark:hover:bg-black/80 shadow-md backdrop-blur-md border border-neutral-200/50 dark:border-white/20 transition-all duration-200 opacity-80 hover:opacity-100 hover:scale-105 active:scale-95 z-10"
+          >
+            <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" />
+          </button>
 
-      <button
-        type="button"
-        onClick={nextSlide}
-        aria-label="Next slide"
-        className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full bg-black/40 hover:bg-black/70 text-white backdrop-blur-md border border-white/20 transition-all duration-200 opacity-80 hover:opacity-100 hover:scale-105 active:scale-95 z-10"
-      >
-        <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6" />
-      </button>
+          <button
+            type="button"
+            onClick={nextSlide}
+            aria-label="Next slide"
+            className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full bg-white/80 hover:bg-white text-neutral-900 dark:bg-black/60 dark:text-white dark:hover:bg-black/80 shadow-md backdrop-blur-md border border-neutral-200/50 dark:border-white/20 transition-all duration-200 opacity-80 hover:opacity-100 hover:scale-105 active:scale-95 z-10"
+          >
+            <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6" />
+          </button>
+        </>
+      )}
 
-      {/* Dot Indicators at Bottom (matching reference screenshot pagination dots) */}
-      <div className="absolute bottom-4 left-0 right-0 flex items-center justify-center gap-2 z-10">
-        {slides.map((_, index) => {
-          const isActive = index === currentIndex;
-          return (
-            <button
-              key={index}
-              type="button"
-              onClick={() => setCurrentIndex(index)}
-              aria-label={`Go to slide ${index + 1}`}
-              aria-current={isActive ? "true" : undefined}
-              className={`transition-all duration-300 rounded-full ${
-                isActive
-                  ? "w-7 h-2 bg-white shadow-sm"
-                  : "w-2 h-2 bg-white/50 hover:bg-white/80"
-              }`}
-            />
-          );
-        })}
-      </div>
+      {/* Dot Indicators at Bottom - only displayed when multiple slides exist */}
+      {totalSlides > 1 && (
+        <div className="absolute bottom-4 left-0 right-0 flex items-center justify-center z-10">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/25 backdrop-blur-sm border border-white/10 shadow-sm">
+            {slides.map((_, index) => {
+              const isActive = index === currentIndex;
+              return (
+                <button
+                  key={index}
+                  type="button"
+                  onClick={() => setCurrentIndex(index)}
+                  aria-label={`Go to slide ${index + 1}`}
+                  aria-current={isActive ? "true" : undefined}
+                  className={`transition-all duration-300 rounded-full ${
+                    isActive
+                      ? "w-6 h-2 bg-white shadow-xs"
+                      : "w-2 h-2 bg-white/60 hover:bg-white"
+                  }`}
+                />
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

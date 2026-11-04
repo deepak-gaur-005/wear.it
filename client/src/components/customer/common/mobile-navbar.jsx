@@ -14,6 +14,7 @@ import {
   LogOut,
   Menu,
   Search,
+  ShieldCheck,
   ShoppingBag,
   ShoppingBasket,
   ShoppingCart,
@@ -103,6 +104,7 @@ function DrawerSection({ title, items }) {
 
 export function CustomerMobileNavbar({
   isSignedIn,
+  isAdmin = false,
   onSignOut,
   onCartOpen,
   cartCount,
@@ -126,6 +128,15 @@ export function CustomerMobileNavbar({
 
   const mobileAccountItems = isSignedIn
     ? [
+        ...(isAdmin
+          ? [
+              {
+                label: "Admin Dashboard",
+                icon: ShieldCheck,
+                href: "/admin",
+              },
+            ]
+          : []),
         {
           label: "My Profile",
           icon: User,
